@@ -20,7 +20,7 @@ def run_baseline_forecast_daily(
     val: pd.DataFrame,
     test: pd.DataFrame,
     use_existing: bool = True,
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Run baseline forecasting methods on the provided data."""
     if use_existing:
         return load_existing_forecasts(val, test, "base_daily")
@@ -49,7 +49,7 @@ def run_baseline_forecast_monthly(
     val: pd.DataFrame,
     test: pd.DataFrame,
     use_existing: bool = True,
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Run baseline forecasting methods on the provided monthly data."""
     if use_existing:
         return load_existing_forecasts(val, test, "base_monthly")
