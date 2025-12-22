@@ -12,7 +12,7 @@ else:
     from forecast_utils import load_existing_forecasts, write_existing_forecasts, merge_datasets_on_forecast
 
 from statsforecast import StatsForecast
-from statsforecast.models import SimpleExponentialSmoothing, Holt, HoltWinters, AutoRegressive
+from statsforecast.models import SimpleExponentialSmoothing, Holt, HoltWinters, AutoETS
 
 def run_statistical_forecast_daily(
     train: pd.DataFrame,
@@ -29,7 +29,7 @@ def run_statistical_forecast_daily(
             SimpleExponentialSmoothing(alpha=0.5),
             Holt(season_length=HORIZON_DAILY, error_type="A"),
             HoltWinters(season_length=HORIZON_DAILY, error_type="A"),
-            AutoRegressive(lags=HORIZON_DAILY)
+            AutoETS(season_length=HORIZON_DAILY)
         ],
         freq=FREQ_DAILY,
         n_jobs=1
@@ -56,7 +56,7 @@ def run_statistical_forecast_monthly(
             SimpleExponentialSmoothing(alpha=0.5),
             Holt(season_length=HORIZON_MONTHLY, error_type="A"),
             HoltWinters(season_length=HORIZON_MONTHLY, error_type="A"),
-            AutoRegressive(lags=HORIZON_MONTHLY)
+            AutoETS(season_length=HORIZON_MONTHLY)
         ],
         freq=FREQ_MONTHLY,
         n_jobs=1
