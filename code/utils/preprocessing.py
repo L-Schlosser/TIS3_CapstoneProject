@@ -39,6 +39,7 @@ def _split_data(df: pl.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFr
     return train_df, val_df, test_df
 
 def _aggregate_monthly(df: pl.DataFrame) -> pl.DataFrame:
+    """Aggregate daily data to monthly frequency by taking the mean."""
     df = df.with_columns(pl.col("ds").dt.truncate("1mo").alias("ds"))
     return df.group_by(["unique_id", "ds"]).agg(pl.col("y").mean().alias("y")).sort("ds")
 
