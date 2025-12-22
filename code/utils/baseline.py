@@ -13,7 +13,7 @@ else:
 from statsforecast import StatsForecast
 from statsforecast.models import SeasonalNaive, HistoricAverage, RandomWalkWithDrift
 
-RESULTS_DATA_DIR = os.path.join(os.path.dirname(__file__), "../../results/forecasts")
+RESULTS_DATA_DIR = os.path.join(os.path.dirname(__file__), "../../results/forecast_data")
 
 def _load_existing_forecasts(val, test, prefix: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Load existing forecasts from CSV files."""
