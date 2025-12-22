@@ -2,9 +2,10 @@ import os
 import polars as pl
 import pandas as pd
 from typing import Tuple
-
-DATA_DIR = os.path.join(os.path.dirname(__file__), "../../data")
-RESULTS_DATA_DIR = os.path.join(os.path.dirname(__file__), "../../results/preprocessed_data")
+if __package__:
+    from .constants import DATA_DIR, PREPROCESSED_DATA_DIR
+else:
+    from constants import DATA_DIR, PREPROCESSED_DATA_DIR
 
 def _read_original_data() -> pl.DataFrame:
     """Read the original data from a CSV file."""
@@ -20,16 +21,16 @@ def _read_original_data() -> pl.DataFrame:
 
 def _read_existing_data(prefix: str) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Read existing preprocessed data from CSV files."""
-    train = pd.read_csv(os.path.join(RESULTS_DATA_DIR, f"{prefix}_train.csv"), parse_dates=["ds"])
-    val = pd.read_csv(os.path.join(RESULTS_DATA_DIR, f"{prefix}_val.csv"), parse_dates=["ds"])
-    test = pd.read_csv(os.path.join(RESULTS_DATA_DIR, f"{prefix}_test.csv"), parse_dates=["ds"])
+    train = pd.read_csv(os.path.join(PREPROCESSED_DATA_DIR, f"{prefix}_train.csv"), parse_dates=["ds"])
+    val = pd.read_csv(os.path.join(PREPROCESSED_DATA_DIR, f"{prefix}_val.csv"), parse_dates=["ds"])
+    test = pd.read_csv(os.path.join(PREPROCESSED_DATA_DIR, f"{prefix}_test.csv"), parse_dates=["ds"])
     return train, val, test
 
 def _write_existing_data(prefix: str, train: pd.DataFrame, val: pd.DataFrame, test: pd.DataFrame) -> None:
     """Write preprocessed data to CSV files."""
-    train.to_csv(os.path.join(RESULTS_DATA_DIR, f"{prefix}_train.csv"), index=False)
-    val.to_csv(os.path.join(RESULTS_DATA_DIR, f"{prefix}_val.csv"), index=False)
-    test.to_csv(os.path.join(RESULTS_DATA_DIR, f"{prefix}_test.csv"), index=False)
+    train.to_csv(os.path.join(PREPROCESSED_DATA_DIR, f"{prefix}_train.csv"), index=False)
+    val.to_csv(os.path.join(PREPROCESSED_DATA_DIR, f"{prefix}_val.csv"), index=False)
+    test.to_csv(os.path.join(PREPROCESSED_DATA_DIR, f"{prefix}_test.csv"), index=False)
 
 def _split_data(df: pl.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Split the data into training, validation, and test sets."""
