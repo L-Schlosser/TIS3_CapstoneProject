@@ -1,5 +1,7 @@
 import os
 
+RANDOM_SEED = 42
+
 HORIZON_DAILY = 365 # days
 HORIZON_MONTHLY = 12 # months
 FREQ_DAILY = "D" # daily
