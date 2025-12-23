@@ -3,11 +3,11 @@ import pandas as pd
 from typing import Tuple
 
 if __package__:
-    from .constants import RANDOM_SEED, FREQ_DAILY, HORIZON_DAILY, FREQ_MONTHLY, HORIZON_MONTHLY
+    from .constants import RANDOM_SEED, FREQ_DAILY, HORIZON_DAILY, FREQ_MONTHLY, HORIZON_MONTHLY, YEAR_RANGE_TRAIN, YEAR_RANGE_VAL, YEAR_RANGE_TEST
     from .preprocessing import load_daily_data, load_monthly_data
     from .forecast_utils import load_existing_forecasts, write_existing_forecasts, merge_datasets_on_forecast, merge_holidays
 else:
-    from constants import RANDOM_SEED, FREQ_DAILY, HORIZON_DAILY, FREQ_MONTHLY, HORIZON_MONTHLY
+    from constants import RANDOM_SEED, FREQ_DAILY, HORIZON_DAILY, FREQ_MONTHLY, HORIZON_MONTHLY, YEAR_RANGE_TRAIN, YEAR_RANGE_VAL, YEAR_RANGE_TEST
     from preprocessing import load_daily_data, load_monthly_data
     from forecast_utils import load_existing_forecasts, write_existing_forecasts, merge_datasets_on_forecast, merge_holidays
 
@@ -93,9 +93,9 @@ def run_machine_learning_forecast_daily(
     if use_existing:
         return load_existing_forecasts(val, test, "ml_daily")
 
-    train_lag = merge_holidays(train, FREQ_DAILY)
-    val_lag = merge_holidays(val, FREQ_DAILY)
-    test_lag = merge_holidays(test, FREQ_DAILY)
+    train_lag = merge_holidays(train, FREQ_DAILY, YEAR_RANGE_TRAIN)
+    val_lag = merge_holidays(val, FREQ_DAILY, YEAR_RANGE_VAL)
+    test_lag = merge_holidays(test, FREQ_DAILY, YEAR_RANGE_TEST)
 
     ml_daily_val, ml_daily_test = _run_normal_mlforecast(train, val, test, FREQ_DAILY, HORIZON_DAILY, 600)
     ml_daily_val_lag, ml_daily_test_lag = _run_lag_mlforecast(train_lag, val_lag, test_lag, FREQ_DAILY, HORIZON_DAILY, 600)
@@ -116,9 +116,9 @@ def run_machine_learning_forecast_monthly(
     if use_existing:
         return load_existing_forecasts(val, test, "ml_monthly")
 
-    train_lag = merge_holidays(train, FREQ_MONTHLY)
-    val_lag = merge_holidays(val, FREQ_MONTHLY)
-    test_lag = merge_holidays(test, FREQ_MONTHLY)
+    train_lag = merge_holidays(train, FREQ_MONTHLY, YEAR_RANGE_TRAIN)
+    val_lag = merge_holidays(val, FREQ_MONTHLY, YEAR_RANGE_VAL)
+    test_lag = merge_holidays(test, FREQ_MONTHLY, YEAR_RANGE_TEST)
 
     ml_monthly_val, ml_monthly_test = _run_normal_mlforecast(train, val, test, FREQ_MONTHLY, HORIZON_MONTHLY, 20)
     ml_monthly_val_lag, ml_monthly_test_lag = _run_lag_mlforecast(train_lag, val_lag, test_lag, FREQ_MONTHLY, HORIZON_MONTHLY, 20)

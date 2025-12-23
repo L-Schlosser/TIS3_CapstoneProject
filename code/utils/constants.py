@@ -11,6 +11,10 @@ H_VAL_MONTHLY = 12
 INPUT_SIZE_DAILY = H_VAL_DAILY * 9
 INPUT_SIZE_MONTHLY = H_VAL_MONTHLY * 9
 
+YEAR_RANGE_TRAIN = range(2015, 2024)
+YEAR_RANGE_VAL = range(2024, 2025)
+YEAR_RANGE_TEST = range(2025, 2026)
+
 DATA_DIR = os.path.join(os.path.dirname(__file__), "../../data")
 PREPROCESSED_DATA_DIR = os.path.join(os.path.dirname(__file__), "../../results/preprocessed_data")
 FORECAST_DATA_DIR = os.path.join(os.path.dirname(__file__), "../../results/forecast_data")
