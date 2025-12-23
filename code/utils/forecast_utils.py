@@ -1,4 +1,5 @@
 import os
+import datetime
 import pandas as pd
 import holidays
 from typing import Tuple
@@ -23,18 +24,17 @@ def merge_datasets_on_forecast(val: pd.DataFrame, test: pd.DataFrame, val_foreca
     test_forecast = test_forecast.merge(test, on=["unique_id", "ds"], how="left")
     return val_forecase, test_forecast
 
-
-def merge_holidays_daily(df):
+def _merge_holidays_daily(df, years: list):
     """Merge holiday information into daily dataframe"""
     ##check if dates are missing
-    aut_holidays = holidays.Austria(years=range(2015, 2026))
-    df['is_holiday'] = df['ds'].isin(aut_holidays.keys()).astype('int8')
+    aut_holidays = holidays.Austria(years=years)
+    df['is_holiday'] = df['ds'].isin(datetime.date(aut_holidays.keys())).astype('int8')
     return df
 
-def merge_holidays_monthly(df, df_daily):
+def _merge_holidays_monthly(df, df_daily):
     """Merge holiday information into monthly dataframe"""
     if 'is_holiday' not in df_daily.columns:
-        df_daily = merge_holidays_daily(df_daily)
+        df_daily = _merge_holidays_daily(df_daily)
 
     daily_helper = df_daily[['unique_id', 'ds', 'is_holiday']].copy()
     daily_helper['year_month'] = daily_helper['ds'].dt.to_period('M')
@@ -52,6 +52,14 @@ def merge_holidays_monthly(df, df_daily):
     df['count_holiday'] = df['count_holiday'].fillna(0).astype('int16')
     return df
 
+def merge_holidays(df, freq, years: list = range(2015, 2026)):
+    """Merge holiday information into dataframe based on frequency"""
+    if freq == "D":
+        return _merge_holidays_daily(df, years)
+    elif freq == "MS":
+        return _merge_holidays_monthly(df, years)
+    else:
+        raise ValueError(f"Unsupported frequency: {freq}")
 
 def _fill_missing_data(df, end_date):
     import pandas as pd

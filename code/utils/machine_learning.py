@@ -79,7 +79,6 @@ def _run_lag_mlforecast(
     rename_dict = {col: f"{col}_Lag" for col in ml_daily_val_lag.columns if col not in ['unique_id', 'ds']}
     ml_daily_val_lag = ml_daily_val_lag.rename(columns=rename_dict)
     ml_daily_test_lag = ml_daily_test_lag.rename(columns=rename_dict)
-
     return ml_daily_val_lag, ml_daily_test_lag
 
 def run_machine_learning_forecast_daily(
@@ -101,7 +100,6 @@ def run_machine_learning_forecast_daily(
 
     ml_daily_val_all = ml_daily_val_lag.merge(ml_daily_val, on=['unique_id','ds'], how='left')
     ml_daily_test_all = ml_daily_test_lag.merge(ml_daily_test, on=['unique_id','ds'], how='left')
-
 
     write_existing_forecasts(ml_daily_val_all, ml_daily_test_all, "ml_daily")
     return merge_datasets_on_forecast(val, test, ml_daily_val_all, ml_daily_test_all)
