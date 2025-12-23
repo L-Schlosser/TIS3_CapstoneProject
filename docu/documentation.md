@@ -55,6 +55,7 @@ Key findings include:
 - Periods of **high volatility and extreme price spikes** caused by supply disruptions and demand shocks
 - Strong **autocorrelation** at multiple lags, indicating significant predictive power of historical prices
 - **Weekly seasonality** in daily data (7-day cycles) and **yearly seasonality** in monthly data (12-month cycles)
+- **Visualizations** help to understand the patterns of the distribution in the data. For example the Heatmap shows us that in 2022 in August there was a high peak of electricity prices due to energy crisis. This then rises the average price per month across all years in August, which we can see in the visualization above.
 
 Visualization techniques employed:
 - Time-series plots showing raw prices and rolling averages to identify trends
