@@ -12,11 +12,6 @@ else:
     from preprocessing import load_daily_data, load_monthly_data
     from forecast_utils import load_existing_forecasts, write_existing_forecasts, merge_datasets_on_forecast, merge_holidays_daily, merge_holidays_monthly
 
-from mlforecast import MLForecast
-from mlforecast.lag_transforms import RollingMean, RollingStd
-from sklearn.linear_model import LinearRegression, HuberRegressor
-from sklearn.ensemble import RandomForestRegressor
-from lightgbm import LGBMRegressor
 from neuralforecast import NeuralForecast
 from neuralforecast.models import KAN, NHITS, RNN, LSTM
 from neuralforecast.losses.pytorch import MAE
@@ -36,7 +31,6 @@ def _create_lag_daily(df):
 
     return df
 
-## CHANGE HERE
 def _create_lag_monthly(df):
     df = df.copy()
     df = merge_holidays_monthly(df, FREQ_MONTHLY)
@@ -267,7 +261,7 @@ def run_deep_learning_forecast_monthly(
     dlf_monthly.fit(df=pd.concat([train, val]))
     dl_monthly_test = dlf_monthly.predict(h=HORIZON_MONTHLY)
 
-    
+
 ### LAGS Version
 
     train_lag = _create_lag_monthly(train)
