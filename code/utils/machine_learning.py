@@ -5,11 +5,11 @@ from typing import Tuple
 if __package__:
     from .constants import RANDOM_SEED, FREQ_DAILY, HORIZON_DAILY, FREQ_MONTHLY, HORIZON_MONTHLY
     from .preprocessing import load_daily_data, load_monthly_data
-    from .forecast_utils import load_existing_forecasts, write_existing_forecasts, merge_datasets_on_forecast, merge_holidays_daily, merge_holidays_monthly
+    from .forecast_utils import load_existing_forecasts, write_existing_forecasts, merge_datasets_on_forecast, merge_holidays
 else:
     from constants import RANDOM_SEED, FREQ_DAILY, HORIZON_DAILY, FREQ_MONTHLY, HORIZON_MONTHLY
     from preprocessing import load_daily_data, load_monthly_data
-    from forecast_utils import load_existing_forecasts, write_existing_forecasts, merge_datasets_on_forecast, merge_holidays_daily, merge_holidays_monthly
+    from forecast_utils import load_existing_forecasts, write_existing_forecasts, merge_datasets_on_forecast, merge_holidays
 
 from mlforecast import MLForecast
 from mlforecast.lag_transforms import RollingMean, RollingStd
@@ -24,6 +24,7 @@ def _run_normal_mlforecast(
     freq: int,
     horizon: int,
     n_lgbm_estimators: int) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Run MLForecast without lag features."""
     ml_forecast = MLForecast(
         models=[
             LinearRegression(),
@@ -50,6 +51,7 @@ def _run_lag_mlforecast(
     freq: int,
     horizon: int,
     n_lgbm_estimators: int) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Run MLForecast with lag features."""
     ml_forecast_lag = MLForecast(
         models=[
             LinearRegression(),
@@ -91,9 +93,9 @@ def run_machine_learning_forecast_daily(
     if use_existing:
         return load_existing_forecasts(val, test, "ml_daily")
 
-    train_lag = merge_holidays_daily(train)
-    val_lag = merge_holidays_daily(val)
-    test_lag = merge_holidays_daily(test)
+    train_lag = merge_holidays(train, FREQ_DAILY)
+    val_lag = merge_holidays(val, FREQ_DAILY)
+    test_lag = merge_holidays(test, FREQ_DAILY)
 
     ml_daily_val, ml_daily_test = _run_normal_mlforecast(train, val, test, FREQ_DAILY, HORIZON_DAILY, 600)
     ml_daily_val_lag, ml_daily_test_lag = _run_lag_mlforecast(train_lag, val_lag, test_lag, FREQ_DAILY, HORIZON_DAILY, 600)
@@ -108,18 +110,15 @@ def run_machine_learning_forecast_monthly(
     train: pd.DataFrame,
     val: pd.DataFrame,
     test: pd.DataFrame,
-    train_daily: pd.DataFrame,
-    val_daily: pd.DataFrame,
-    test_daily: pd.DataFrame,
     use_existing: bool = True,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Run machine learning forecasting methods on the provided data - monthly"""
     if use_existing:
         return load_existing_forecasts(val, test, "ml_monthly")
 
-    train_lag = merge_holidays_monthly(train, train_daily)
-    val_lag = merge_holidays_monthly(val, val_daily)
-    test_lag = merge_holidays_monthly(test, test_daily)
+    train_lag = merge_holidays(train, FREQ_MONTHLY)
+    val_lag = merge_holidays(val, FREQ_MONTHLY)
+    test_lag = merge_holidays(test, FREQ_MONTHLY)
 
     ml_monthly_val, ml_monthly_test = _run_normal_mlforecast(train, val, test, FREQ_MONTHLY, HORIZON_MONTHLY, 20)
     ml_monthly_val_lag, ml_monthly_test_lag = _run_lag_mlforecast(train_lag, val_lag, test_lag, FREQ_MONTHLY, HORIZON_MONTHLY, 20)
@@ -135,5 +134,5 @@ if __name__ == "__main__":
     run_machine_learning_forecast_daily(train, val, test, use_existing=False)
     run_machine_learning_forecast_daily(train, val, test, use_existing=True)
     train_m, val_m, test_m = load_monthly_data(use_existing=True)
-    run_machine_learning_forecast_monthly(train_m, val_m, test_m, train, val, test, use_existing=False)
-    run_machine_learning_forecast_monthly(train_m, val_m, test_m, train, val, test, use_existing=True)
+    run_machine_learning_forecast_monthly(train_m, val_m, test_m, use_existing=False)
+    run_machine_learning_forecast_monthly(train_m, val_m, test_m, use_existing=True)
