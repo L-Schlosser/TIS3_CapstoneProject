@@ -27,17 +27,16 @@ def merge_datasets_on_forecast(val: pd.DataFrame, test: pd.DataFrame, val_foreca
 
 def _merge_holidays_daily(df: pd.DataFrame, years: list):
     """Merge holiday information into daily dataframe"""
-    ##check if dates are missing
-    aut_holidays = holidays.Austria(years=years)
-    df['is_holiday'] = df['ds'].isin(datetime.date(aut_holidays.keys())).astype('int8')
+    austrian_holidays = holidays.Austria(years=years)
+    unique_dates = pd.DataFrame({'ds': pd.date_range(start=f'{min(years)}-01-01', end=f'{max(years)}-12-31', freq='D')})
+    df = unique_dates.merge(df, on='ds', how='left')
+    holiday_ts = pd.to_datetime(list(austrian_holidays.keys()))
+    df['is_holiday'] = df['ds'].isin(holiday_ts).astype('int8')
     return df
 
 def _merge_holidays_monthly(df: pd.DataFrame, years: list):
     """Merge holiday information into monthly dataframe"""
-    daily_df = df[['unique_id', 'ds']].copy()
-    df_daily = _merge_holidays_daily(df, years)
-
-    daily_helper = df_daily[['unique_id', 'ds', 'is_holiday']].copy()
+    daily_helper = _merge_holidays_daily(df, years)
     daily_helper['year_month'] = daily_helper['ds'].dt.to_period('M')
 
     monthly_holidays = (
@@ -62,25 +61,3 @@ def merge_holidays(df: pd.DataFrame, freq: str, years: list = range(2015, 2026))
         return _merge_holidays_monthly(df, years)
     else:
         raise ValueError(f"Unsupported frequency: {freq}")
-
-def _fill_missing_data(df, end_date):
-    import pandas as pd
-
-    last_mean = df.tail(10)["y"].mean()
-
-    full_dates = pd.date_range(start=df["ds"].min(), end=pd.to_datetime(end_date), freq="D")
-    df_full = df.set_index("ds").reindex(full_dates).rename_axis("ds").reset_index()
-
-    df_full["y"] = df_full["y"].fillna(last_mean)
-    df_full["unique_id"] = "Austria"
-    return df_full
-
-
-    val = _fill_missing_data(val, "2025-12-31")
-    test = pd.DataFrame({"ds": pd.date_range(start="2026-01-01", end="2026-12-31", freq=FREQ_DAILY),
-                         "unique_id": "Austria"})
-    
-        test = pd.DataFrame({"ds": pd.date_range(start="2026-01-01", end="2026-12-31", freq=FREQ_MONTHLY),
-                         "unique_id": "Austria"})
-    test_daily = pd.DataFrame({"ds": pd.date_range(start="2026-01-01", end="2026-12-31", freq=FREQ_DAILY),
-                         "unique_id": "Austria"})
