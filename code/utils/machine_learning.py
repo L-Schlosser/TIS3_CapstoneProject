@@ -37,9 +37,9 @@ def _run_normal_mlforecast(
     mlf_daily = MLForecast(
         models=[
             LinearRegression(),
-            HuberRegressor(epsilon=1.35, alpha=1e-3),
+            HuberRegressor(epsilon=1.35, alpha=1e-3, max_iter=1000),
             RandomForestRegressor(n_estimators=400, max_depth=20, min_samples_leaf=5, max_features='sqrt', random_state=RANDOM_SEED),
-            LGBMRegressor(objective="regression", boosting_type="gbdt", learning_rate=0.05, n_estimators=600, num_leaves=31, max_depth=-1, min_child_samples=10, subsample=0.7, colsample_bytree=0.7, random_state=RANDOM_SEED),
+            LGBMRegressor(boosting_type="gbdt", learning_rate=0.1, n_estimators=600, random_state=RANDOM_SEED),
         ],
         lags=[],
         date_features=['dayofweek', 'month', 'quarter'],
@@ -62,9 +62,9 @@ def _run_lag_mlforecast(
     mlf_daily_lag = MLForecast(
         models=[
             LinearRegression(),
-            HuberRegressor(epsilon=1.35, alpha=1e-3),
+            HuberRegressor(epsilon=1.35, alpha=1e-3, max_iter=1000),
             RandomForestRegressor(n_estimators=400, max_depth=20, min_samples_leaf=5, max_features='sqrt', random_state=RANDOM_SEED),
-            LGBMRegressor(objective="regression", boosting_type="gbdt", learning_rate=0.1, n_estimators=300, num_leaves=31, max_depth=6, min_child_samples=10, subsample=0.7, colsample_bytree=0.7, reg_alpha=0.3, reg_lambda=0.3, random_state=RANDOM_SEED),
+            LGBMRegressor(boosting_type="gbdt", learning_rate=0.1, n_estimators=600, random_state=RANDOM_SEED),
         ],
         lags=[1, 7, 28],
         date_features=['dayofweek', 'month', 'quarter'],
