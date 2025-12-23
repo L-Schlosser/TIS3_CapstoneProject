@@ -39,7 +39,7 @@ def _run_normal_mlforecast(
             LinearRegression(),
             HuberRegressor(epsilon=1.35, alpha=1e-3),
             RandomForestRegressor(n_estimators=400, max_depth=20, min_samples_leaf=5, max_features='sqrt', random_state=RANDOM_SEED),
-            LGBMRegressor(objective="regression", boosting_type="gbdt", learning_rate=0.05, n_estimators=600, num_leaves=31, max_depth=-1, min_child_samples=50, subsample=0.7, colsample_bytree=0.7, reg_alpha=0.2, reg_lambda=0.2, random_state=RANDOM_SEED),
+            LGBMRegressor(objective="regression", boosting_type="gbdt", learning_rate=0.05, n_estimators=600, num_leaves=31, max_depth=-1, min_child_samples=10, subsample=0.7, colsample_bytree=0.7, random_state=RANDOM_SEED),
         ],
         lags=[],
         date_features=['dayofweek', 'month', 'quarter'],

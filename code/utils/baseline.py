@@ -27,7 +27,7 @@ def run_baseline_forecast_daily(
     
     sf_daily = StatsForecast(
         models=[
-            SeasonalNaive(season_length=HORIZON_DAILY),
+            SeasonalNaive(season_length=7), # weekly seasonality
             RandomWalkWithDrift(),
             HistoricAverage(),
         ],
@@ -56,7 +56,7 @@ def run_baseline_forecast_monthly(
     
     sf_monthly = StatsForecast(
         models=[
-            SeasonalNaive(season_length=HORIZON_MONTHLY),
+            SeasonalNaive(season_length=12), # yearly seasonality
             RandomWalkWithDrift(),
             HistoricAverage(),
         ],
