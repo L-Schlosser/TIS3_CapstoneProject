@@ -27,9 +27,9 @@ def run_statistical_forecast_daily(
     sf_daily = StatsForecast(
         models=[
             SimpleExponentialSmoothing(alpha=0.5),
-            Holt(season_length=HORIZON_DAILY, error_type="A"),
-            HoltWinters(season_length=HORIZON_DAILY, error_type="A"),
-            AutoETS(season_length=HORIZON_DAILY)
+            Holt(season_length=7, error_type="A"),
+            HoltWinters(season_length=7, error_type="A"),
+            AutoETS(season_length=7)
         ],
         freq=FREQ_DAILY,
         n_jobs=1
@@ -54,9 +54,9 @@ def run_statistical_forecast_monthly(
     sf_monthly = StatsForecast(
         models=[
             SimpleExponentialSmoothing(alpha=0.5),
-            Holt(season_length=HORIZON_MONTHLY, error_type="A"),
-            HoltWinters(season_length=HORIZON_MONTHLY, error_type="A"),
-            AutoETS(season_length=HORIZON_MONTHLY)
+            Holt(season_length=12, error_type="A"),
+            HoltWinters(season_length=12, error_type="A"),
+            AutoETS(season_length=12)
         ],
         freq=FREQ_MONTHLY,
         n_jobs=1
