@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import holidays
 from typing import Tuple
 if __package__:
     from .constants import FORECAST_DATA_DIR
@@ -21,3 +22,32 @@ def merge_datasets_on_forecast(val: pd.DataFrame, test: pd.DataFrame, val_foreca
     val_forecase = val_forecase.merge(val, on=["unique_id", "ds"], how="left")
     test_forecast = test_forecast.merge(test, on=["unique_id", "ds"], how="left")
     return val_forecase, test_forecast
+
+
+def merge_holidays_daily(df):
+    """Merge holiday information into daily dataframe"""
+    ##check if dates are missing
+    aut_holidays = holidays.Austria(years=range(2015, 2026))
+    df['is_holiday'] = df['ds'].isin(aut_holidays.keys()).astype('int8')
+    return df
+
+def merge_holidays_monthly(df, df_daily):
+    """Merge holiday information into monthly dataframe"""
+    if 'is_holiday' not in df_daily.columns:
+        df_daily = merge_holidays_daily(df_daily)
+
+    daily_helper = df_daily[['unique_id', 'ds', 'is_holiday']].copy()
+    daily_helper['year_month'] = daily_helper['ds'].dt.to_period('M')
+
+    monthly_holidays = (
+        daily_helper
+        .groupby(['unique_id', 'year_month'], as_index=False)['is_holiday']
+        .sum()
+        .rename(columns={'is_holiday': 'count_holiday'})
+    )
+    monthly_holidays['ds'] = monthly_holidays['year_month'].dt.to_timestamp()
+    monthly_holidays = monthly_holidays.drop(columns=['year_month'])
+
+    df = df.merge(monthly_holidays, on=['unique_id', 'ds'], how='left')
+    df['count_holiday'] = df['count_holiday'].fillna(0).astype('int16')
+    return df
