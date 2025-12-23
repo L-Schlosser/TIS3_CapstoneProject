@@ -51,3 +51,26 @@ def merge_holidays_monthly(df, df_daily):
     df = df.merge(monthly_holidays, on=['unique_id', 'ds'], how='left')
     df['count_holiday'] = df['count_holiday'].fillna(0).astype('int16')
     return df
+
+
+def _fill_missing_data(df, end_date):
+    import pandas as pd
+
+    last_mean = df.tail(10)["y"].mean()
+
+    full_dates = pd.date_range(start=df["ds"].min(), end=pd.to_datetime(end_date), freq="D")
+    df_full = df.set_index("ds").reindex(full_dates).rename_axis("ds").reset_index()
+
+    df_full["y"] = df_full["y"].fillna(last_mean)
+    df_full["unique_id"] = "Austria"
+    return df_full
+
+
+    val = _fill_missing_data(val, "2025-12-31")
+    test = pd.DataFrame({"ds": pd.date_range(start="2026-01-01", end="2026-12-31", freq=FREQ_DAILY),
+                         "unique_id": "Austria"})
+    
+        test = pd.DataFrame({"ds": pd.date_range(start="2026-01-01", end="2026-12-31", freq=FREQ_MONTHLY),
+                         "unique_id": "Austria"})
+    test_daily = pd.DataFrame({"ds": pd.date_range(start="2026-01-01", end="2026-12-31", freq=FREQ_DAILY),
+                         "unique_id": "Austria"})
