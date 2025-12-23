@@ -4,11 +4,11 @@ from typing import Tuple
 
 
 if __package__:
-    from .constants import FREQ_DAILY, HORIZON_DAILY, FREQ_MONTHLY, HORIZON_MONTHLY, INPUT_SIZE_DAILY, INPUT_SIZE_MONTHLY, H_VAL_DAILY, H_VAL_MONTHLY
+    from .constants import FREQ_DAILY, HORIZON_DAILY, FREQ_MONTHLY, HORIZON_MONTHLY, INPUT_SIZE_DAILY, INPUT_SIZE_MONTHLY, H_VAL_DAILY, H_VAL_MONTHLY, INPUT_SIZE_DAILY_LAGS, INPUT_SIZE_MONTHLY_LAGS
     from .preprocessing import load_daily_data, load_monthly_data
     from .forecast_utils import load_existing_forecasts, write_existing_forecasts, merge_datasets_on_forecast, merge_holidays_daily, merge_holidays_monthly
 else:
-    from constants import FREQ_DAILY, HORIZON_DAILY, FREQ_MONTHLY, HORIZON_MONTHLY, INPUT_SIZE_DAILY, INPUT_SIZE_MONTHLY, H_VAL_DAILY, H_VAL_MONTHLY
+    from constants import FREQ_DAILY, HORIZON_DAILY, FREQ_MONTHLY, HORIZON_MONTHLY, INPUT_SIZE_DAILY, INPUT_SIZE_MONTHLY, H_VAL_DAILY, H_VAL_MONTHLY, INPUT_SIZE_DAILY_LAGS, INPUT_SIZE_MONTHLY_LAGS
     from preprocessing import load_daily_data, load_monthly_data
     from forecast_utils import load_existing_forecasts, write_existing_forecasts, merge_datasets_on_forecast, merge_holidays_daily, merge_holidays_monthly
 
@@ -72,7 +72,7 @@ def run_deep_learning_forecast_daily(
                 input_size=INPUT_SIZE_DAILY,
                 n_freq_downsample=[2, 1, 1],
                 scaler_type='robust',
-                max_steps=200,
+                max_steps=300,
                 inference_windows_batch_size=1,
                 learning_rate=1e-3,
             ),
@@ -94,7 +94,7 @@ def run_deep_learning_forecast_daily(
                 encoder_hidden_size=128,
                 decoder_hidden_size=128,
                 decoder_layers=2,
-                max_steps=200,
+                max_steps=300,
             ),
             LSTM(
                 input_size=INPUT_SIZE_DAILY,
@@ -127,10 +127,10 @@ def run_deep_learning_forecast_daily(
         models=[
             NHITS(
                 h=H_VAL_DAILY,
-                input_size=INPUT_SIZE_DAILY,
+                input_size=INPUT_SIZE_DAILY_LAGS,
                 n_freq_downsample=[2, 1, 1],
                 scaler_type='robust',
-                max_steps=200,
+                max_steps=300,
                 inference_windows_batch_size=1,
                 learning_rate=1e-3,
                 hist_exog_list=lags_columns
@@ -138,7 +138,7 @@ def run_deep_learning_forecast_daily(
             
             KAN(
                 h=H_VAL_DAILY,
-                input_size=INPUT_SIZE_DAILY,
+                input_size=INPUT_SIZE_DAILY_LAGS,
                 loss=MAE(),
                 scaler_type='robust',
                 learning_rate=1e-3,
@@ -147,19 +147,19 @@ def run_deep_learning_forecast_daily(
             ),
             RNN(
                 h=H_VAL_DAILY,
-                input_size=INPUT_SIZE_DAILY,
-                inference_input_size=INPUT_SIZE_DAILY,
+                input_size=INPUT_SIZE_DAILY_LAGS,
+                inference_input_size=INPUT_SIZE_DAILY_LAGS,
                 loss=MAE(),
                 scaler_type='robust',
                 encoder_n_layers=2,
                 encoder_hidden_size=128,
                 decoder_hidden_size=128,
                 decoder_layers=2,
-                max_steps=200,
+                max_steps=300,
                 hist_exog_list=lags_columns
             ),
             LSTM(
-                input_size=INPUT_SIZE_DAILY,
+                input_size=INPUT_SIZE_DAILY_LAGS,
                 h=H_VAL_DAILY,
                 max_steps=500,
                 loss=MAE(),
@@ -216,7 +216,7 @@ def run_deep_learning_forecast_monthly(
                 input_size=INPUT_SIZE_MONTHLY,
                 n_freq_downsample=[2, 1, 1],
                 scaler_type='robust',
-                max_steps=200,
+                max_steps=300,
                 inference_windows_batch_size=1,
                 learning_rate=1e-3,
             ),
@@ -238,7 +238,7 @@ def run_deep_learning_forecast_monthly(
                 encoder_hidden_size=128,
                 decoder_hidden_size=128,
                 decoder_layers=2,
-                max_steps=200,
+                max_steps=300,
             ),
             LSTM(
                 input_size=INPUT_SIZE_MONTHLY,
@@ -272,10 +272,10 @@ def run_deep_learning_forecast_monthly(
         models=[
             NHITS(
                 h=H_VAL_MONTHLY,
-                input_size=INPUT_SIZE_MONTHLY,
+                input_size=INPUT_SIZE_MONTHLY_LAGS,
                 n_freq_downsample=[2, 1, 1],
                 scaler_type='robust',
-                max_steps=200,
+                max_steps=300,
                 inference_windows_batch_size=1,
                 learning_rate=1e-3,
                 hist_exog_list=lags_columns
@@ -283,7 +283,7 @@ def run_deep_learning_forecast_monthly(
             
             KAN(
                 h=H_VAL_MONTHLY,
-                input_size=INPUT_SIZE_MONTHLY,
+                input_size=INPUT_SIZE_MONTHLY_LAGS,
                 loss=MAE(),
                 scaler_type='robust',
                 learning_rate=1e-3,
@@ -292,19 +292,19 @@ def run_deep_learning_forecast_monthly(
             ),
             RNN(
                 h=H_VAL_MONTHLY,
-                input_size=INPUT_SIZE_MONTHLY,
-                inference_input_size=INPUT_SIZE_MONTHLY,
+                input_size=INPUT_SIZE_MONTHLY_LAGS,
+                inference_input_size=INPUT_SIZE_MONTHLY_LAGS,
                 loss=MAE(),
                 scaler_type='robust',
                 encoder_n_layers=2,
                 encoder_hidden_size=128,
                 decoder_hidden_size=128,
                 decoder_layers=2,
-                max_steps=200,
+                max_steps=300,
                 hist_exog_list=lags_columns
             ),
             LSTM(
-                input_size=INPUT_SIZE_MONTHLY,
+                input_size=INPUT_SIZE_MONTHLY_LAGS,
                 h=H_VAL_MONTHLY,
                 max_steps=500,
                 loss=MAE(),
