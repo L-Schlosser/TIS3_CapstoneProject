@@ -33,13 +33,15 @@ def _run_normal_mlforecast(
     train: pd.DataFrame,
     val: pd.DataFrame,
     test: pd.DataFrame,
-    freq: int) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    freq: int,
+    horizon: int,
+    n_tree_estimators: int) -> Tuple[pd.DataFrame, pd.DataFrame]:
     mlf_daily = MLForecast(
         models=[
             LinearRegression(),
             HuberRegressor(epsilon=1.35, alpha=1e-3, max_iter=1000),
-            RandomForestRegressor(n_estimators=400, max_depth=20, min_samples_leaf=5, max_features='sqrt', random_state=RANDOM_SEED),
-            LGBMRegressor(boosting_type="gbdt", learning_rate=0.1, n_estimators=600, random_state=RANDOM_SEED),
+            RandomForestRegressor(n_estimators=n_tree_estimators, max_depth=20, min_samples_leaf=5, max_features='sqrt', random_state=RANDOM_SEED),
+            LGBMRegressor(boosting_type="gbdt", learning_rate=0.1, n_estimators=n_tree_estimators, random_state=RANDOM_SEED),
         ],
         lags=[],
         date_features=['dayofweek', 'month', 'quarter'],
@@ -47,10 +49,10 @@ def _run_normal_mlforecast(
     )
 
     mlf_daily.fit(df=train, static_features=[])
-    ml_daily_val = mlf_daily.predict(h=HORIZON_DAILY)
+    ml_daily_val = mlf_daily.predict(h=horizon)
 
     mlf_daily.fit(df=pd.concat([train, val]), static_features=[])
-    ml_daily_test = mlf_daily.predict(h=HORIZON_DAILY)
+    ml_daily_test = mlf_daily.predict(h=horizon)
     return ml_daily_val, ml_daily_test
 
 def _run_lag_mlforecast(
@@ -58,13 +60,14 @@ def _run_lag_mlforecast(
     val_lag: pd.DataFrame,
     test_lag: pd.DataFrame,
     freq: int,
-    horizon: int) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    horizon: int,
+    n_tree_estimators: int) -> Tuple[pd.DataFrame, pd.DataFrame]:
     mlf_daily_lag = MLForecast(
         models=[
             LinearRegression(),
             HuberRegressor(epsilon=1.35, alpha=1e-3, max_iter=1000),
-            RandomForestRegressor(n_estimators=400, max_depth=20, min_samples_leaf=5, max_features='sqrt', random_state=RANDOM_SEED),
-            LGBMRegressor(boosting_type="gbdt", learning_rate=0.1, n_estimators=600, random_state=RANDOM_SEED),
+            RandomForestRegressor(n_estimators=n_tree_estimators, max_depth=20, min_samples_leaf=5, max_features='sqrt', random_state=RANDOM_SEED),
+            LGBMRegressor(boosting_type="gbdt", learning_rate=0.1, n_estimators=n_tree_estimators, random_state=RANDOM_SEED),
         ],
         lags=[1, 7, 28],
         date_features=['dayofweek', 'month', 'quarter'],
@@ -102,7 +105,7 @@ def run_machine_learning_forecast_daily(
     if use_existing:
         return load_existing_forecasts(val, test, "ml_daily")
 
-    ml_daily_val, ml_daily_test = _run_normal_mlforecast(train, val, test, FREQ_DAILY)
+    ml_daily_val, ml_daily_test = _run_normal_mlforecast(train, val, test, FREQ_DAILY, HORIZON_DAILY, n_tree_estimators=600)
    
     val = _fill_missing_data(val, "2025-12-31")
     test = pd.DataFrame({"ds": pd.date_range(start="2026-01-01", end="2026-12-31", freq=FREQ_DAILY),
@@ -112,7 +115,7 @@ def run_machine_learning_forecast_daily(
     val_lag = merge_holidays_daily(val)
     test_lag = merge_holidays_daily(test)
 
-    ml_daily_val_lag, ml_daily_test_lag = _run_lag_mlforecast(train_lag, val_lag, test_lag, FREQ_DAILY, HORIZON_DAILY)
+    ml_daily_val_lag, ml_daily_test_lag = _run_lag_mlforecast(train_lag, val_lag, test_lag, FREQ_DAILY, HORIZON_DAILY, n_tree_estimators=600)
 
     ml_daily_val_all = ml_daily_val_lag.merge(ml_daily_val, on=['unique_id','ds'], how='left')
     ml_daily_test_all = ml_daily_test_lag.merge(ml_daily_test, on=['unique_id','ds'], how='left')
@@ -135,7 +138,7 @@ def run_machine_learning_forecast_monthly(
     if use_existing:
         return load_existing_forecasts(val, test, "ml_monthly")
 
-    ml_monthly_val, ml_monthly_test = _run_normal_mlforecast(train, val, test, FREQ_MONTHLY)
+    ml_monthly_val, ml_monthly_test = _run_normal_mlforecast(train, val, test, FREQ_MONTHLY, HORIZON_MONTHLY, n_tree_estimators=400)
 
 
     test = pd.DataFrame({"ds": pd.date_range(start="2026-01-01", end="2026-12-31", freq=FREQ_MONTHLY),
@@ -146,7 +149,7 @@ def run_machine_learning_forecast_monthly(
     val_lag = merge_holidays_monthly(val, val_daily)
     test_lag = merge_holidays_monthly(test, test_daily)
 
-    ml_monthly_val_lag, ml_monthly_test_lag = _run_lag_mlforecast(train_lag, val_lag, test_lag, FREQ_MONTHLY, HORIZON_MONTHLY)
+    ml_monthly_val_lag, ml_monthly_test_lag = _run_lag_mlforecast(train_lag, val_lag, test_lag, FREQ_MONTHLY, HORIZON_MONTHLY, n_tree_estimators=400)
 
     ml_monthly_val_all = ml_monthly_val_lag.merge(ml_monthly_val, on=['unique_id','ds'], how='left')
     ml_monthly_test_all = ml_monthly_test_lag.merge(ml_monthly_test, on=['unique_id','ds'], how='left')
