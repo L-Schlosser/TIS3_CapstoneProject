@@ -50,24 +50,16 @@ def _create_lag_monthly(df):
 
     return df
 
-
-
-def run_deep_learning_forecast_daily(
+def _run_normal_dlforecast(
     train: pd.DataFrame,
     val: pd.DataFrame,
     test: pd.DataFrame,
-    use_existing: bool = True,
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Run deep learning forecasting methods on the provided data."""
-    if use_existing:
-        return load_existing_forecasts(val, test, "ml_daily")
-
-
-## normal Version
-    dlf_daily = NeuralForecast(
+    freq: int,
+    horizon: int) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    dl_forecast = NeuralForecast(
         models=[
             NHITS(
-                h=H_VAL_DAILY,
+                h=horizon,
                 input_size=INPUT_SIZE_DAILY,
                 n_freq_downsample=[2, 1, 1],
                 scaler_type='robust',
@@ -76,7 +68,7 @@ def run_deep_learning_forecast_daily(
                 learning_rate=1e-3,
             ),
             KAN(
-                h=H_VAL_DAILY,
+                h=horizon,
                 input_size=INPUT_SIZE_DAILY,
                 loss=MAE(),
                 scaler_type='robust',
@@ -84,7 +76,7 @@ def run_deep_learning_forecast_daily(
                 max_steps=500,
             ),
             RNN(
-                h=H_VAL_DAILY,
+                h=horizon,
                 input_size=INPUT_SIZE_DAILY,
                 inference_input_size=INPUT_SIZE_DAILY,
                 loss=MAE(),
@@ -97,7 +89,7 @@ def run_deep_learning_forecast_daily(
             ),
             LSTM(
                 input_size=INPUT_SIZE_DAILY,
-                h=H_VAL_DAILY,
+                h=horizon,
                 max_steps=500,
                 loss=MAE(),
                 scaler_type='robust',
@@ -107,25 +99,30 @@ def run_deep_learning_forecast_daily(
                 decoder_layers=2,
             ),
         ],
-        freq=FREQ_DAILY,
+        freq=freq,
     )
 
-    dlf_daily.fit(df=train)
-    dl_daily_val = dlf_daily.predict(h=HORIZON_DAILY)
+    dl_forecast.fit(df=train)
+    dl_val = dl_forecast.predict(h=horizon)
 
-    dlf_daily.fit(df=pd.concat([train, val]))
-    dl_daily_test = dlf_daily.predict(h=HORIZON_DAILY)
+    dl_forecast.fit(df=pd.concat([train, val]))
+    dl_test = dl_forecast.predict(h=horizon)
+    return dl_val, dl_test
 
-### LAGS Version
-
+def _run_lag_dlforecast(
+    train: pd.DataFrame,
+    val: pd.DataFrame,
+    test: pd.DataFrame,
+    freq: int,
+    horizon: int) -> Tuple[pd.DataFrame, pd.DataFrame]:
     train_lag = _create_lag_daily(train)
     val_lag = _create_lag_daily(val)
     lags_columns = ['is_holiday', 'lag1', 'lag7', 'lag28', 'lag365', 'rolling_mean_7', 'rolling_mean_30']
 
-    dlf_daily_lag = NeuralForecast(
+    dl_forecast_lag = NeuralForecast(
         models=[
             NHITS(
-                h=H_VAL_DAILY,
+                h=horizon,
                 input_size=INPUT_SIZE_DAILY_LAGS,
                 n_freq_downsample=[2, 1, 1],
                 scaler_type='robust',
@@ -136,7 +133,7 @@ def run_deep_learning_forecast_daily(
             ),
             
             KAN(
-                h=H_VAL_DAILY,
+                h=horizon,
                 input_size=INPUT_SIZE_DAILY_LAGS,
                 loss=MAE(),
                 scaler_type='robust',
@@ -145,7 +142,7 @@ def run_deep_learning_forecast_daily(
                 hist_exog_list=lags_columns
             ),
             RNN(
-                h=H_VAL_DAILY,
+                h=horizon,
                 input_size=INPUT_SIZE_DAILY_LAGS,
                 inference_input_size=INPUT_SIZE_DAILY_LAGS,
                 loss=MAE(),
@@ -159,7 +156,7 @@ def run_deep_learning_forecast_daily(
             ),
             LSTM(
                 input_size=INPUT_SIZE_DAILY_LAGS,
-                h=H_VAL_DAILY,
+                h=horizon,
                 max_steps=500,
                 loss=MAE(),
                 scaler_type='robust',
@@ -173,23 +170,30 @@ def run_deep_learning_forecast_daily(
         freq=FREQ_DAILY,
     )
 
-    dlf_daily_lag.fit(df=train_lag)
-    dl_daily_val_lag = dlf_daily_lag.predict(h=HORIZON_DAILY)
-    dl_daily_val_lag = dl_daily_val_lag.rename(columns={
-        "NHITS": "NHITS_Lag",
-        "KAN": "KAN_Lag",
-        "RNN": "RNN_Lag",
-        "LSTM": "LSTM_Lag"
-    })
+    dl_forecast_lag.fit(df=train_lag)
+    dl_val_lag = dl_forecast_lag.predict(h=horizon)
     
-    dlf_daily_lag.fit(df=pd.concat([train_lag, val_lag]))
-    dl_daily_test_lag = dlf_daily_lag.predict(h=HORIZON_DAILY)
-    dl_daily_test_lag = dl_daily_test_lag.rename(columns={
-        "NHITS": "NHITS_Lag",
-        "KAN": "KAN_Lag",
-        "RNN": "RNN_Lag",
-        "LSTM": "LSTM_Lag"
-    })
+    dl_forecast_lag.fit(df=pd.concat([train_lag, val_lag]))
+    dl_test_lag = dl_forecast_lag.predict(h=horizon)
+    
+    rename_dict = {col: f"{col}_Lag" for col in dl_val_lag.columns if col not in ['unique_id', 'ds']}
+    dl_val_lag = dl_val_lag.rename(columns=rename_dict)
+    dl_test_lag = dl_test_lag.rename(columns=rename_dict)
+    return dl_val_lag, dl_test_lag
+
+def run_deep_learning_forecast_daily(
+    train: pd.DataFrame,
+    val: pd.DataFrame,
+    test: pd.DataFrame,
+    use_existing: bool = True,
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Run deep learning forecasting methods on the provided data."""
+    if use_existing:
+        return load_existing_forecasts(val, test, "dl_daily")
+
+    dl_daily_val, dl_daily_test = _run_normal_dlforecast(train, val, test, FREQ_DAILY, HORIZON_DAILY)
+    dl_daily_val_lag, dl_daily_test_lag = _run_lag_dlforecast(train, val, test, FREQ_DAILY, HORIZON_DAILY)
+    
     dl_daily_val_all = dl_daily_val_lag.merge(dl_daily_val, on=['unique_id','ds'], how='left')
     dl_daily_test_all = dl_daily_test_lag.merge(dl_daily_test, on=['unique_id','ds'], how='left')
 
@@ -205,7 +209,7 @@ def run_deep_learning_forecast_monthly(
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Run deep learning forecasting methods on the provided data."""
     if use_existing:
-        return load_existing_forecasts(val, test, "ml_monthly")
+        return load_existing_forecasts(val, test, "dl_monthly")
 
 ## normal Version
     dlf_monthly = NeuralForecast(

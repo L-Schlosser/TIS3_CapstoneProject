@@ -38,11 +38,11 @@ def _run_normal_mlforecast(
     )
 
     ml_forecast.fit(df=train, static_features=[])
-    ml_daily_val = ml_forecast.predict(h=horizon)
+    ml_val = ml_forecast.predict(h=horizon)
 
     ml_forecast.fit(df=pd.concat([train, val]), static_features=[])
-    ml_daily_test = ml_forecast.predict(h=horizon)
-    return ml_daily_val, ml_daily_test
+    ml_test = ml_forecast.predict(h=horizon)
+    return ml_val, ml_test
 
 def _run_lag_mlforecast(
     train: pd.DataFrame,
@@ -78,15 +78,15 @@ def _run_lag_mlforecast(
     )
 
     ml_forecast_lag.fit(df=train_lag, static_features=[])
-    ml_daily_val_lag = ml_forecast_lag.predict(h=horizon, X_df=val_lag_ext)
+    ml_val_lag = ml_forecast_lag.predict(h=horizon, X_df=val_lag_ext)
 
     ml_forecast_lag.fit(df=pd.concat([train_lag, val_lag]), static_features=[])
-    ml_daily_test_lag = ml_forecast_lag.predict(h=horizon, X_df=test_lag)
+    ml_test_lag = ml_forecast_lag.predict(h=horizon, X_df=test_lag)
 
-    rename_dict = {col: f"{col}_Lag" for col in ml_daily_val_lag.columns if col not in ['unique_id', 'ds']}
-    ml_daily_val_lag = ml_daily_val_lag.rename(columns=rename_dict)
-    ml_daily_test_lag = ml_daily_test_lag.rename(columns=rename_dict)
-    return ml_daily_val_lag, ml_daily_test_lag
+    rename_dict = {col: f"{col}_Lag" for col in ml_val_lag.columns if col not in ['unique_id', 'ds']}
+    ml_val_lag = ml_val_lag.rename(columns=rename_dict)
+    ml_test_lag = ml_test_lag.rename(columns=rename_dict)
+    return ml_val_lag, ml_test_lag
 
 def run_machine_learning_forecast_daily(
     train: pd.DataFrame,
