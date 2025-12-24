@@ -64,3 +64,45 @@ def merge_holidays(df: pd.DataFrame, freq: str, date_range: tuple) -> pd.DataFra
         return monthly_result
     else:
         raise ValueError(f"Unsupported frequency: {freq}")
+
+def _create_dl_lag_daily(df, date_range: tuple):
+    df = merge_holidays(df, FREQ_DAILY, date_range)
+
+    # 6 useful lag features
+    grouped = df.groupby('unique_id')['y']
+
+    df['lag1'] = grouped.transform(lambda x: x.shift(1)).fillna(0)         # yesterday
+    df['lag7'] = grouped.transform(lambda x: x.shift(7)).fillna(0)         # 1 week ago
+    df['lag28'] = grouped.transform(lambda x: x.shift(28)).fillna(0)         # 4 weeks ago
+    df['lag365'] = grouped.transform(lambda x: x.shift(365)).fillna(0)         # 1 year ago
+    df['rolling_mean_7'] = grouped.transform(lambda x: x.shift(1).rolling(7).mean()).fillna(0)   # weekly trend
+    df['rolling_mean_30'] = grouped.transform(lambda x: x.shift(1).rolling(30).mean()).fillna(0)  # monthly trend
+
+    return df
+
+def _create_dl_lag_monthly(df, date_range: tuple):
+    df = merge_holidays(df, FREQ_MONTHLY, date_range)
+
+    # 6 useful lag features
+    grouped = df.groupby('unique_id')['y']
+
+    df['lag1'] = grouped.transform(lambda x: x.shift(1)).fillna(0)          # last month
+    df['lag3'] = grouped.transform(lambda x: x.shift(3)).fillna(0)          # last quarter
+    df['lag6'] = grouped.transform(lambda x: x.shift(6)).fillna(0)          # half-year
+    df['lag12'] = grouped.transform(lambda x: x.shift(12)).fillna(0)        # last year
+
+    df['rolling_mean_3'] = grouped.transform(lambda x: x.shift(1).rolling(3).mean()).fillna(0) # quarterly trend
+    df['rolling_mean_12'] = grouped.transform(lambda x: x.shift(1).rolling(12).mean()).fillna(0) # yearly trend
+    return df
+
+def create_deep_learning_lag(
+    df: pd.DataFrame,
+    freq: str,
+    date_range: tuple) -> pd.DataFrame:
+    """Create lag features for deep learning models based on frequency"""
+    if freq == FREQ_DAILY:
+        return _create_dl_lag_daily(df, date_range)
+    elif freq == FREQ_MONTHLY:
+        return _create_dl_lag_monthly(df, date_range)
+    else:
+        raise ValueError(f"Unsupported frequency: {freq}")
