@@ -2,7 +2,6 @@ import polars as pl
 import pandas as pd
 from typing import Tuple
 
-
 if __package__:
     from .constants import FREQ_DAILY, HORIZON_DAILY, FREQ_MONTHLY, HORIZON_MONTHLY, INPUT_SIZE_DAILY, INPUT_SIZE_MONTHLY, H_VAL_DAILY, H_VAL_MONTHLY, INPUT_SIZE_DAILY_LAGS, INPUT_SIZE_MONTHLY_LAGS
     from .preprocessing import load_daily_data, load_monthly_data

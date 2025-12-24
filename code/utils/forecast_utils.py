@@ -25,19 +25,18 @@ def merge_datasets_on_forecast(val: pd.DataFrame, test: pd.DataFrame, val_foreca
     test_forecast = test_forecast.merge(test, on=["unique_id", "ds"], how="left")
     return val_forecase, test_forecast
 
-def _merge_holidays_daily(df: pd.DataFrame, years: list):
+def _merge_holidays_daily(df: pd.DataFrame, date_range: tuple):
     """Merge holiday information into daily dataframe"""
-    austrian_holidays = holidays.Austria(years=years)
-    unique_dates = pd.DataFrame({"ds": pd.date_range(start=f"{min(years)}-01-01", end=f"{max(years)}-12-31", freq="D"), "unique_id": "Austria"})
-    join_type = "right" if df.empty else "left"
-    df = df.merge(unique_dates, on="ds", how=join_type)
+    unique_dates = pd.DataFrame({"ds": pd.date_range(start=date_range[0], end=date_range[1], freq="D"), "unique_id": "Austria"})
+    austrian_holidays = holidays.Austria(years=range(unique_dates["ds"].min().year, unique_dates["ds"].max().year + 1))
+    df = unique_dates.merge(df, on=["unique_id", "ds"], how="left")
     holiday_ts = pd.to_datetime(list(austrian_holidays.keys()))
     df["is_holiday"] = df["ds"].isin(holiday_ts).astype("int8")
     return df
 
-def _merge_holidays_monthly(df: pd.DataFrame, years: list):
+def _merge_holidays_monthly(df: pd.DataFrame, date_range: tuple):
     """Merge holiday information into monthly dataframe"""
-    daily_helper = _merge_holidays_daily(df, years)
+    daily_helper = _merge_holidays_daily(df, date_range)
     daily_helper["year_month"] = daily_helper["ds"].dt.to_period("M")
 
     monthly_holidays = (
@@ -50,15 +49,18 @@ def _merge_holidays_monthly(df: pd.DataFrame, years: list):
     monthly_holidays["ds"] = monthly_holidays["year_month"].dt.to_timestamp()
     monthly_holidays = monthly_holidays.drop(columns=["year_month"])
 
-    df = df.merge(monthly_holidays, on=["unique_id", "ds"], how="left")
-    df["count_holiday"] = df["count_holiday"].fillna(0).astype("int16")
+    df = monthly_holidays.merge(df, on=["unique_id", "ds"], how="left")
     return df
 
-def merge_holidays(df: pd.DataFrame, freq: str, years: list) -> pd.DataFrame:
+def merge_holidays(df: pd.DataFrame, freq: str, date_range: tuple) -> pd.DataFrame:
     """Merge holiday information into dataframe based on frequency"""
     if freq == FREQ_DAILY:
-        return _merge_holidays_daily(df, years)
+        daily_result = _merge_holidays_daily(df, date_range)
+        daily_result["y"] = daily_result["y"].infer_objects(copy=False).fillna(-1)
+        return daily_result
     elif freq == FREQ_MONTHLY:
-        return _merge_holidays_monthly(df, years)
+        monthly_result = _merge_holidays_monthly(df, date_range)
+        monthly_result["y"] = monthly_result["y"].infer_objects(copy=False).fillna(-1)
+        return monthly_result
     else:
         raise ValueError(f"Unsupported frequency: {freq}")

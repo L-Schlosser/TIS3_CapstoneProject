@@ -33,7 +33,7 @@ def _write_existing_data(prefix: str, train: pd.DataFrame, val: pd.DataFrame, te
     test.to_csv(os.path.join(PREPROCESSED_DATA_DIR, f"{prefix}_test.csv"), index=False)
 
 def _split_data(df: pl.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Split the data into training, validation, and test sets."""
+    """Split the data into training, validation, and test sets."""    
     train_df = df[df["ds"] < pd.to_datetime("2025-01-01")]
     val_df = df[(df["ds"] >= pd.to_datetime("2025-01-01")) & (df["ds"] < pd.to_datetime("2026-01-01"))]
     test_df = pd.DataFrame(columns=df.columns)

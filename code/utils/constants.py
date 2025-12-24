@@ -14,9 +14,10 @@ INPUT_SIZE_MONTHLY = H_VAL_MONTHLY * 3
 INPUT_SIZE_MONTHLY_LAGS = H_VAL_MONTHLY * 2
 
 
-YEAR_RANGE_TRAIN = range(2015, 2024)
-YEAR_RANGE_VAL = range(2024, 2025)
-YEAR_RANGE_TEST = range(2025, 2026)
+DATE_RANGE_TRAIN = ("01.01.2015", "31.12.2024")
+DATE_RANGE_VAL = ("01.01.2025", "22.12.2025")
+DATE_RANGE_VAL_EXTENDED = ("01.01.2025", "31.12.2025")
+DATE_RANGE_TEST = ("23.12.2025", "22.12.2026")
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "../../data")
 PREPROCESSED_DATA_DIR = os.path.join(os.path.dirname(__file__), "../../results/preprocessed_data")

@@ -3,11 +3,11 @@ import pandas as pd
 from typing import Tuple
 
 if __package__:
-    from .constants import RANDOM_SEED, FREQ_DAILY, HORIZON_DAILY, FREQ_MONTHLY, HORIZON_MONTHLY, YEAR_RANGE_TRAIN, YEAR_RANGE_VAL, YEAR_RANGE_TEST
+    from .constants import RANDOM_SEED, FREQ_DAILY, HORIZON_DAILY, FREQ_MONTHLY, HORIZON_MONTHLY, DATE_RANGE_TRAIN, DATE_RANGE_VAL, DATE_RANGE_VAL_EXTENDED, DATE_RANGE_TEST
     from .preprocessing import load_daily_data, load_monthly_data
     from .forecast_utils import load_existing_forecasts, write_existing_forecasts, merge_datasets_on_forecast, merge_holidays
 else:
-    from constants import RANDOM_SEED, FREQ_DAILY, HORIZON_DAILY, FREQ_MONTHLY, HORIZON_MONTHLY, YEAR_RANGE_TRAIN, YEAR_RANGE_VAL, YEAR_RANGE_TEST
+    from constants import RANDOM_SEED, FREQ_DAILY, HORIZON_DAILY, FREQ_MONTHLY, HORIZON_MONTHLY, DATE_RANGE_TRAIN, DATE_RANGE_VAL, DATE_RANGE_VAL_EXTENDED, DATE_RANGE_TEST
     from preprocessing import load_daily_data, load_monthly_data
     from forecast_utils import load_existing_forecasts, write_existing_forecasts, merge_datasets_on_forecast, merge_holidays
 
@@ -45,13 +45,18 @@ def _run_normal_mlforecast(
     return ml_daily_val, ml_daily_test
 
 def _run_lag_mlforecast(
-    train_lag: pd.DataFrame,
-    val_lag: pd.DataFrame,
-    test_lag: pd.DataFrame,
+    train: pd.DataFrame,
+    val: pd.DataFrame,
+    test: pd.DataFrame,
     freq: int,
     horizon: int,
     n_lgbm_estimators: int) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Run MLForecast with lag features."""
+    train_lag = merge_holidays(train, freq, DATE_RANGE_TRAIN)
+    val_lag = merge_holidays(val, freq, DATE_RANGE_VAL)
+    val_lag_ext = merge_holidays(val, freq, DATE_RANGE_VAL_EXTENDED)
+    test_lag = merge_holidays(test, freq, DATE_RANGE_TEST)
+
     ml_forecast_lag = MLForecast(
         models=[
             LinearRegression(),
@@ -73,7 +78,7 @@ def _run_lag_mlforecast(
     )
 
     ml_forecast_lag.fit(df=train_lag, static_features=[])
-    ml_daily_val_lag = ml_forecast_lag.predict(h=horizon, X_df=val_lag)
+    ml_daily_val_lag = ml_forecast_lag.predict(h=horizon, X_df=val_lag_ext)
 
     ml_forecast_lag.fit(df=pd.concat([train_lag, val_lag]), static_features=[])
     ml_daily_test_lag = ml_forecast_lag.predict(h=horizon, X_df=test_lag)
@@ -93,12 +98,8 @@ def run_machine_learning_forecast_daily(
     if use_existing:
         return load_existing_forecasts(val, test, "ml_daily")
 
-    train_lag = merge_holidays(train, FREQ_DAILY, YEAR_RANGE_TRAIN)
-    val_lag = merge_holidays(val, FREQ_DAILY, YEAR_RANGE_VAL)
-    test_lag = merge_holidays(test, FREQ_DAILY, YEAR_RANGE_TEST)
-
     ml_daily_val, ml_daily_test = _run_normal_mlforecast(train, val, test, FREQ_DAILY, HORIZON_DAILY, 600)
-    ml_daily_val_lag, ml_daily_test_lag = _run_lag_mlforecast(train_lag, val_lag, test_lag, FREQ_DAILY, HORIZON_DAILY, 600)
+    ml_daily_val_lag, ml_daily_test_lag = _run_lag_mlforecast(train, val, test, FREQ_DAILY, HORIZON_DAILY, 600)
 
     ml_daily_val_all = ml_daily_val_lag.merge(ml_daily_val, on=['unique_id','ds'], how='left')
     ml_daily_test_all = ml_daily_test_lag.merge(ml_daily_test, on=['unique_id','ds'], how='left')
@@ -116,12 +117,8 @@ def run_machine_learning_forecast_monthly(
     if use_existing:
         return load_existing_forecasts(val, test, "ml_monthly")
 
-    train_lag = merge_holidays(train, FREQ_MONTHLY, YEAR_RANGE_TRAIN)
-    val_lag = merge_holidays(val, FREQ_MONTHLY, YEAR_RANGE_VAL)
-    test_lag = merge_holidays(test, FREQ_MONTHLY, YEAR_RANGE_TEST)
-
-    ml_monthly_val, ml_monthly_test = _run_normal_mlforecast(train, val, test, FREQ_MONTHLY, HORIZON_MONTHLY, 20)
-    ml_monthly_val_lag, ml_monthly_test_lag = _run_lag_mlforecast(train_lag, val_lag, test_lag, FREQ_MONTHLY, HORIZON_MONTHLY, 20)
+    ml_monthly_val, ml_monthly_test = _run_normal_mlforecast(train, val, test, FREQ_MONTHLY, HORIZON_MONTHLY, 100)
+    ml_monthly_val_lag, ml_monthly_test_lag = _run_lag_mlforecast(train, val, test, FREQ_MONTHLY, HORIZON_MONTHLY, 100)
 
     ml_monthly_val_all = ml_monthly_val_lag.merge(ml_monthly_val, on=['unique_id','ds'], how='left')
     ml_monthly_test_all = ml_monthly_test_lag.merge(ml_monthly_test, on=['unique_id','ds'], how='left')
