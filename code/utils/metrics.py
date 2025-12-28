@@ -63,7 +63,7 @@ def calculate_metrics(prediction_df: pd.DataFrame, family: str, frequency: str, 
         prediction_df = prediction_df.groupby(['unique_id', 'ds'])[columns].mean().reset_index()
 
     metrics = _calculate_metric_monthly(prediction_df, family, frequency, split)
-    metrics.to_csv(path)
+    metrics.to_csv(path, index=False)
     return metrics
 
 if __name__ == "__main__":
