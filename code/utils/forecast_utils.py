@@ -73,8 +73,9 @@ def _create_dl_lag_daily(df, date_range: tuple):
 
     df['lag1'] = grouped.transform(lambda x: x.shift(1)).fillna(0)         # yesterday
     df['lag7'] = grouped.transform(lambda x: x.shift(7)).fillna(0)         # 1 week ago
-    df['lag28'] = grouped.transform(lambda x: x.shift(28)).fillna(0)         # 4 weeks ago
-    df['lag365'] = grouped.transform(lambda x: x.shift(365)).fillna(0)         # 1 year ago
+    df['lag28'] = grouped.transform(lambda x: x.shift(28)).fillna(0)       # 4 weeks ago
+    df['lag365'] = grouped.transform(lambda x: x.shift(365)).fillna(0)     # 1 year ago
+    
     df['rolling_mean_7'] = grouped.transform(lambda x: x.shift(1).rolling(7).mean()).fillna(0)   # weekly trend
     df['rolling_mean_30'] = grouped.transform(lambda x: x.shift(1).rolling(30).mean()).fillna(0)  # monthly trend
 
