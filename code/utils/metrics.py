@@ -33,7 +33,7 @@ def _calculate_metric_monthly(prediction_df: pd.DataFrame, family: str, frequenc
     prediction_df = prediction_df.dropna()
 
     for col in prediction_df.columns :
-        if col in ['unique_id', 'ds', 'y']:
+        if col in ["unique_id", "ds", "y"]:
             continue
 
         metrics["Model"].append(col)

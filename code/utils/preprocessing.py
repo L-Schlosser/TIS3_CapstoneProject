@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import polars as pl
 import pandas as pd
 from typing import Tuple
@@ -49,7 +50,8 @@ def load_daily_data(use_existing: bool = True) -> Tuple[pd.DataFrame, pd.DataFra
     if use_existing:
         return _read_existing_data("daily")
     
-    train_df, val_df, test_df = _split_data(_read_original_data().to_pandas())
+    daily_df = _read_original_data().to_pandas()
+    train_df, val_df, test_df = _split_data(daily_df)
     _write_existing_data("daily", train_df, val_df, test_df)
     return train_df, val_df, test_df
 
