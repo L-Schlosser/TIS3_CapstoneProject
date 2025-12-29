@@ -58,10 +58,13 @@ Key findings include:
 - **Visualizations** help to understand the patterns of the distribution in the data. For example the Heatmap shows us that in 2022 in August there was a high peak of electricity prices due to energy crisis. This then rises the average price per month across all years in August, which we can see in the visualization above.
 
 Visualization techniques employed:
-- Time-series plots showing raw prices and rolling averages to identify trends
-- Seasonal decomposition to separate trend, seasonal, and residual components
+- Time-series plot showing raw daily prices
+- Seasonal summaries: monthly average by month and yearly average by year
 - Distribution analysis (histograms, box plots) to detect outliers and understand price ranges
-- Autocorrelation and Partial Autocorrelation Function (ACF/PACF) plots to determine optimal lag features
+- Month–year heatmap highlighting seasonal patterns and extreme spikes
+
+Implementation notes (EDA):
+- The notebook generates the time-series plot, distribution charts (histogram and box), monthly and yearly average bar charts, and the month–year heatmap.
 
 ### Feature engineering
 > Feature engineering focuses on capturing temporal dependencies and seasonal effects. Different feature sets are engineered for daily and monthly frequencies.
@@ -144,6 +147,17 @@ Evaluation metrics include:
 - Mean Absolute Error (MAE)
 - Root Mean Squared Error (RMSE)
 - Mean Absolute Percentage Error (MAPE)
+
+How metrics are calculated:
+- For monthly models: metrics are computed directly on the validation split, comparing each model’s forecast column to `y`.
+- For daily models: `ds` is converted to month start and forecasts are averaged per month (`unique_id`, `ds`) to align horizons with monthly metrics; then MAE, RMSE, and MAPE are computed per model column.
+- Columns used for scoring exclude identifier and date fields; only forecast columns are evaluated. Rows with missing values are dropped before scoring.
+- Results are sorted by MAPE (ascending) and persisted as CSVs under `results/metrics/` with the naming pattern `{family}_{frequency}_{split}_metrics.csv`. A `use_existing` flag allows reloading cached metrics for reproducibility.
+
+Why these metrics:
+- MAE: Interpretable in EUR/MWh, representing average absolute deviation. Suitable for business reporting and robust to extreme spikes compared to squared errors.
+- RMSE: Penalizes large errors more strongly, highlighting models that avoid big misses. Useful when risk of large deviations carries higher operational costs.
+- MAPE: Scale-free percentage error, enabling comparison across periods and facilitating stakeholder communication. Note: care is taken with low `y` values as MAPE can inflate when actuals are near zero.
 
 Visual diagnostics such as predicted vs. actual plots, residual analysis, and prediction intervals are used to assess performance.
 
