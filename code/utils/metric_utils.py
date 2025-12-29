@@ -22,22 +22,22 @@ def load_overall_metrics() -> pd.DataFrame:
     base_metrics = pd.concat([
         calculate_metrics(None, FAMILY_BASELINE, FREQ_DAILY, SPLIT_VAL, use_existing=True),
         calculate_metrics(None, FAMILY_BASELINE, FREQ_MONTHLY, SPLIT_VAL, use_existing=True)
-    ], ignore_index=True).sort_values(by=["MAPE"])
+    ], ignore_index=True)
 
     stat_metrics = pd.concat([
         calculate_metrics(None, FAMILY_STATISTICAL, FREQ_DAILY, SPLIT_VAL, use_existing=True),
         calculate_metrics(None, FAMILY_STATISTICAL, FREQ_MONTHLY, SPLIT_VAL, use_existing=True)
-    ], ignore_index=True).sort_values(by=["MAPE"])
+    ], ignore_index=True)
 
     ml_metrics = pd.concat([
         calculate_metrics(None, FAMILY_MACHINE_LEARNING, FREQ_DAILY, SPLIT_VAL, use_existing=True),
         calculate_metrics(None, FAMILY_MACHINE_LEARNING, FREQ_MONTHLY, SPLIT_VAL, use_existing=True)
-    ], ignore_index=True).sort_values(by=["MAPE"])
+    ], ignore_index=True)
 
     dl_metrics = pd.concat([
         calculate_metrics(None, FAMILY_DEEP_LEARNING, FREQ_DAILY, SPLIT_VAL, use_existing=True),
         calculate_metrics(None, FAMILY_DEEP_LEARNING, FREQ_MONTHLY, SPLIT_VAL, use_existing=True)
-    ], ignore_index=True).sort_values(by=["MAPE"])
+    ], ignore_index=True)
 
     return pd.concat([base_metrics, stat_metrics, ml_metrics, dl_metrics], ignore_index=True).sort_values(by=["MAPE"]).reset_index(drop=True)
 
