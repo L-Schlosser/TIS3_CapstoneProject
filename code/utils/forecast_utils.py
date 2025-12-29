@@ -72,13 +72,17 @@ def _create_dl_lag_daily(df, date_range: tuple):
     # 6 useful lag features
     grouped = df.groupby('unique_id')['y']
 
-    df['lag1'] = grouped.transform(lambda x: x.shift(1)).fillna(0)         # yesterday
-    df['lag7'] = grouped.transform(lambda x: x.shift(7)).fillna(0)         # 1 week ago
-    df['lag28'] = grouped.transform(lambda x: x.shift(28)).fillna(0)       # 4 weeks ago
-    df['lag365'] = grouped.transform(lambda x: x.shift(365)).fillna(0)     # 1 year ago
-    
-    df['rolling_mean_7'] = grouped.transform(lambda x: x.shift(1).rolling(7).mean()).fillna(0)   # weekly trend
-    df['rolling_mean_30'] = grouped.transform(lambda x: x.shift(1).rolling(30).mean()).fillna(0)  # monthly trend
+    df['rolling_mean_3_lag1'] = grouped.transform(
+        lambda x: x.shift(1).rolling(window=3).mean()
+    ).fillna(0)   # short-term trend
+
+    df['rolling_mean_3_lag7'] = grouped.transform(
+        lambda x: x.shift(7).rolling(window=3).mean()
+    ).fillna(0)   # weekly-smoothed trend
+
+    df['rolling_mean_14_lag28'] = grouped.transform(
+        lambda x: x.shift(28).rolling(window=14).mean()
+    ).fillna(0)
 
     return df
 
@@ -88,13 +92,13 @@ def _create_dl_lag_monthly(df, date_range: tuple):
     # 6 useful lag features
     grouped = df.groupby('unique_id')['y']
 
-    df['lag1'] = grouped.transform(lambda x: x.shift(1)).fillna(0)          # last month
-    df['lag3'] = grouped.transform(lambda x: x.shift(3)).fillna(0)          # last quarter
-    df['lag6'] = grouped.transform(lambda x: x.shift(6)).fillna(0)          # half-year
-    df['lag12'] = grouped.transform(lambda x: x.shift(12)).fillna(0)        # last year
+    df['rolling_mean_3_lag6'] = grouped.transform(
+        lambda x: x.shift(6).rolling(window=3).mean()
+    ).fillna(0)
 
-    df['rolling_mean_3'] = grouped.transform(lambda x: x.shift(1).rolling(3).mean()).fillna(0) # quarterly trend
-    df['rolling_mean_12'] = grouped.transform(lambda x: x.shift(1).rolling(12).mean()).fillna(0) # yearly trend
+    df['rolling_mean_12_lag24'] = grouped.transform(
+        lambda x: x.shift(24).rolling(window=12).mean()
+    ).fillna(0)
     return df
 
 def create_deep_learning_lag(

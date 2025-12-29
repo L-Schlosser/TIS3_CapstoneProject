@@ -101,7 +101,6 @@ def _run_lag_dlforecast(
                 learning_rate=1e-3,
                 hist_exog_list=lags_columns
             ),
-            
             KAN(
                 h=horizon,
                 input_size=input_size,
@@ -127,13 +126,13 @@ def _run_lag_dlforecast(
             LSTM(
                 input_size=input_size,
                 h=horizon,
-                max_steps=500,
                 loss=MAE(),
                 scaler_type='robust',
                 encoder_n_layers=1,
                 encoder_hidden_size=64,
                 decoder_hidden_size=64,
                 decoder_layers=1,
+                max_steps=500,
                 hist_exog_list=lags_columns
             ),
         ],
