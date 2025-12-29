@@ -25,6 +25,11 @@ DATE_RANGE_VAL = ("01.01.2025", "22.12.2025")
 DATE_RANGE_VAL_EXTENDED = ("01.01.2025", "31.12.2025")
 DATE_RANGE_TEST = ("23.12.2025", "22.12.2026")
 
+DEFAULT_START_VAL_VIS = "2023-01-01"
+DEFAULT_END_VAL_VIS = "2025-12-31"
+FUTURE_END_VAL_VIS = "2026-12-31"
+
+
 DATA_DIR = os.path.join(os.path.dirname(__file__), "../../data")
 PREPROCESSED_DATA_DIR = os.path.join(os.path.dirname(__file__), "../../results/preprocessed_data")
 FORECAST_DATA_DIR = os.path.join(os.path.dirname(__file__), "../../results/forecast_data")
