@@ -147,3 +147,4 @@ def plot_residuals(model):
     plt.plot([min_val, max_val], [min_val, max_val], color='red', linestyle='--')
     plt.title('Predicted vs Actual Values from ' + str(model_name) + 'with Frequency ' + str(frequency))
     plt.legend([model_name])
+    plt.savefig(f'../results/visualizations/forecasts/residuals_{model_name}_{frequency}.png', dpi=300, bbox_inches='tight')
