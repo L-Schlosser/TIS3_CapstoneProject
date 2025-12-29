@@ -18,7 +18,7 @@ else:
     from machine_learning import run_machine_learning_forecast_daily, run_machine_learning_forecast_monthly
     from deep_learning import run_deep_learning_forecast_daily, run_deep_learning_forecast_monthly
 
-def load_overall_metrics() -> pd.DataFrame:
+def load_overall_metrics(metric: str = "WAPE") -> pd.DataFrame:
     base_metrics = pd.concat([
         calculate_metrics(None, FAMILY_BASELINE, FREQ_DAILY, SPLIT_VAL, use_existing=True),
         calculate_metrics(None, FAMILY_BASELINE, FREQ_MONTHLY, SPLIT_VAL, use_existing=True)
@@ -39,7 +39,7 @@ def load_overall_metrics() -> pd.DataFrame:
         calculate_metrics(None, FAMILY_DEEP_LEARNING, FREQ_MONTHLY, SPLIT_VAL, use_existing=True)
     ], ignore_index=True)
 
-    return pd.concat([base_metrics, stat_metrics, ml_metrics, dl_metrics], ignore_index=True).sort_values(by=["MAPE"]).reset_index(drop=True)
+    return pd.concat([base_metrics, stat_metrics, ml_metrics, dl_metrics], ignore_index=True).sort_values(by=metric).reset_index(drop=True)
 
 def merge_prediction_dfs(
         base_df_val: pd.DataFrame, base_df_test: pd.DataFrame,
@@ -78,7 +78,7 @@ def merge_prediction_dfs(
     )
     return merged_df
 
-def find_n_best_models(metric_df: pd.DataFrame, n: int, daily_forecasts: pd.DataFrame, monthly_forecasts: pd.DataFrame, metric: str = "MAPE", frequencies: List[str] = [FREQ_DAILY, FREQ_MONTHLY], best_per_family: bool = False) -> List[str]:
+def find_n_best_models(metric_df: pd.DataFrame, n: int, daily_forecasts: pd.DataFrame, monthly_forecasts: pd.DataFrame, metric: str = "WAPE", frequencies: List[str] = [FREQ_DAILY, FREQ_MONTHLY], best_per_family: bool = False) -> List[str]:
     metric_df = metric_df[metric_df["Frequency"].isin(frequencies)]
     sorted_df = metric_df.sort_values(by=metric)
     best_models = { }

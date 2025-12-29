@@ -28,6 +28,7 @@ def _calculate_metric_monthly(prediction_df: pd.DataFrame, family: str, frequenc
         "MAE": [],
         "RMSE": [],
         "MAPE": [],
+        "WAPE": []
     }
 
     prediction_df = prediction_df.dropna()
@@ -43,6 +44,7 @@ def _calculate_metric_monthly(prediction_df: pd.DataFrame, family: str, frequenc
         metrics["MAE"].append(mean_absolute_error(prediction_df['y'], prediction_df[col]))
         metrics["RMSE"].append(root_mean_squared_error(prediction_df['y'], prediction_df[col]))
         metrics["MAPE"].append(mean_absolute_percentage_error(prediction_df['y'], prediction_df[col]))
+        metrics["WAPE"].append((prediction_df['y'] - prediction_df[col]).abs().sum() / prediction_df['y'].abs().sum())
 
     return pd.DataFrame(metrics).sort_values(by=["MAPE"])
 
