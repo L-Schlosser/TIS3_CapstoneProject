@@ -78,18 +78,22 @@ def merge_prediction_dfs(
     )
     return merged_df
 
-def find_n_best_models(metric_df: pd.DataFrame, n: int, daily_forecasts: pd.DataFrame, monthly_forecasts: pd.DataFrame, metric: str = "MAPE") -> List[str]:
+def find_n_best_models(metric_df: pd.DataFrame, n: int, daily_forecasts: pd.DataFrame, monthly_forecasts: pd.DataFrame, metric: str = "MAPE", frequencies: List[str] = [FREQ_DAILY, FREQ_MONTHLY], best_per_family: bool = False) -> List[str]:
+    metric_df = metric_df[metric_df["Frequency"].isin(frequencies)]
     sorted_df = metric_df.sort_values(by=metric)
     best_models = { }
 
-    for i in range(n):
-        if sorted_df.iloc[i]["Frequency"] == FREQ_DAILY:
-            data = daily_forecasts
-        else:
-            data = monthly_forecasts
+    max_n = min(sorted_df["Model"].groupby(sorted_df["Family"]).count()) if best_per_family else len(sorted_df)
 
-        data = data[["unique_id", "ds", metric_df.iloc[i]["Model"]]]
-        best_models[i] = { "name": metric_df.iloc[i]["Model"], "frequency": metric_df.iloc[i]["Frequency"], "data": data }
+    if n == -1 or n > max_n:
+        n = max_n
+
+    sorted_df = sorted_df.groupby("Family").head(n) if best_per_family else sorted_df.head(n)
+
+    for idx, row in sorted_df.iterrows():
+        data = daily_forecasts if row["Frequency"] == FREQ_DAILY else monthly_forecasts
+        data = data[["unique_id", "ds", row["Model"]]]
+        best_models[idx] = { "name": row["Model"], "family": row["Family"], "frequency": row["Frequency"], "data": data }
 
     return best_models
 
@@ -113,4 +117,5 @@ if __name__ == "__main__":
     merged_daily = merge_prediction_dfs(base_daily_val, base_daily_test, stat_daily_val, stat_daily_test, ml_daily_val, ml_daily_test, dl_daily_val, dl_daily_test)
     merged_monthly = merge_prediction_dfs(base_monthly_val, base_monthly_test, stat_monthly_val, stat_monthly_test, ml_monthly_val, ml_monthly_test, dl_monthly_val, dl_monthly_test)
 
-    find_n_best_models(overall_metrics, 3, merged_daily, merged_monthly)
+    print(find_n_best_models(overall_metrics, 2, merged_daily, merged_monthly))
+    print(find_n_best_models(overall_metrics, 1, merged_daily, merged_monthly, best_per_family=True))

@@ -26,7 +26,7 @@ def merge_datasets_on_forecast(val: pd.DataFrame, test: pd.DataFrame, val_foreca
     test_forecast = test_forecast.merge(test, on=["unique_id", "ds"], how="left")
     return val_forecase, test_forecast
 
-def _merge_holidays_daily(df: pd.DataFrame, date_range: tuple):
+def _merge_holidays_daily(df: pd.DataFrame, date_range: tuple) -> pd.DataFrame:
     """Merge holiday information into daily dataframe"""
     unique_dates = pd.DataFrame({"ds": pd.date_range(start=date_range[0], end=date_range[1], freq="D"), "unique_id": "Austria"})
     austrian_holidays = holidays.Austria(years=range(unique_dates["ds"].min().year, unique_dates["ds"].max().year + 1))
@@ -35,7 +35,7 @@ def _merge_holidays_daily(df: pd.DataFrame, date_range: tuple):
     df["is_holiday"] = df["ds"].isin(holiday_ts).astype("int8")
     return df
 
-def _merge_holidays_monthly(df: pd.DataFrame, date_range: tuple):
+def _merge_holidays_monthly(df: pd.DataFrame, date_range: tuple) -> pd.DataFrame:
     """Merge holiday information into monthly dataframe"""
     daily_helper = _merge_holidays_daily(df, date_range)
     daily_helper["year_month"] = daily_helper["ds"].dt.to_period("M")
@@ -66,7 +66,7 @@ def merge_holidays(df: pd.DataFrame, freq: str, date_range: tuple) -> pd.DataFra
     else:
         raise ValueError(f"Unsupported frequency: {freq}")
 
-def _create_dl_lag_daily(df, date_range: tuple):
+def _create_dl_lag_daily(df: pd.DataFrame, date_range: tuple) -> pd.DataFrame:
     df = merge_holidays(df, FREQ_DAILY, date_range)
 
     # 6 useful lag features
@@ -86,7 +86,7 @@ def _create_dl_lag_daily(df, date_range: tuple):
 
     return df
 
-def _create_dl_lag_monthly(df, date_range: tuple):
+def _create_dl_lag_monthly(df: pd.DataFrame, date_range: tuple) -> pd.DataFrame:
     df = merge_holidays(df, FREQ_MONTHLY, date_range)
 
     # 6 useful lag features
