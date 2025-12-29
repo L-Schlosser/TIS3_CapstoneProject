@@ -51,20 +51,18 @@ def merge_prediction_dfs(
 
     base_df_val["Split"] = SPLIT_VAL
     base_df_test["Split"] = SPLIT_TEST
-    base_df = pd.concat([base_df_val, base_df_test], ignore_index=True)
+    base_df = pd.concat([base_df_val.infer_objects(copy=False).fillna(-1), base_df_test.infer_objects(copy=False).fillna(-1)], ignore_index=True)
 
     stat_df_val["Split"] = SPLIT_VAL
     stat_df_test["Split"] = SPLIT_TEST
-    stat_df = pd.concat([stat_df_val, stat_df_test], ignore_index=True)
-
+    stat_df = pd.concat([stat_df_val.infer_objects(copy=False).fillna(-1), stat_df_test.infer_objects(copy=False).fillna(-1)], ignore_index=True)
     ml_df_val["Split"] = SPLIT_VAL
     ml_df_test["Split"] = SPLIT_TEST
-    ml_df = pd.concat([ml_df_val, ml_df_test], ignore_index=True)
+    ml_df = pd.concat([ml_df_val.infer_objects(copy=False).fillna(-1), ml_df_test.infer_objects(copy=False).fillna(-1)], ignore_index=True)
 
     dl_df_val["Split"] = SPLIT_VAL
     dl_df_test["Split"] = SPLIT_TEST
-    dl_df = pd.concat([dl_df_val, dl_df_test], ignore_index=True)
-
+    dl_df = pd.concat([dl_df_val.infer_objects(copy=False).fillna(-1), dl_df_test.infer_objects(copy=False).fillna(-1)], ignore_index=True)
     merged_df = base_df.merge(
         stat_df,
         on=["unique_id", "ds", "y", "Split"],
@@ -115,4 +113,4 @@ if __name__ == "__main__":
     merged_daily = merge_prediction_dfs(base_daily_val, base_daily_test, stat_daily_val, stat_daily_test, ml_daily_val, ml_daily_test, dl_daily_val, dl_daily_test)
     merged_monthly = merge_prediction_dfs(base_monthly_val, base_monthly_test, stat_monthly_val, stat_monthly_test, ml_monthly_val, ml_monthly_test, dl_monthly_val, dl_monthly_test)
 
-    print(find_n_best_models(overall_metrics, 3, merged_daily, merged_monthly))
+    find_n_best_models(overall_metrics, 3, merged_daily, merged_monthly)
