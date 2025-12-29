@@ -94,7 +94,13 @@ def find_n_best_models(metric_df: pd.DataFrame, n: int, daily_forecasts: pd.Data
     for idx, row in sorted_df.iterrows():
         data = daily_forecasts if row["Frequency"] == FREQ_DAILY else monthly_forecasts
         data = data[["unique_id", "ds", row["Model"]]]
-        best_models[idx] = { "name": row["Model"], "family": row["Family"], "frequency": row["Frequency"], "data": data }
+        best_models[idx] = { 
+            "name": row["Model"], 
+            "family": row["Family"], 
+            "frequency": row["Frequency"],
+            "metrics": row[["MAE", "RMSE", "MAPE", "WAPE"]].to_dict(),
+            "data": data 
+        }
 
     return best_models
 
