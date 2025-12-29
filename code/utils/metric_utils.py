@@ -89,6 +89,7 @@ def find_n_best_models(metric_df: pd.DataFrame, n: int, daily_forecasts: pd.Data
         n = max_n
 
     sorted_df = sorted_df.groupby("Family").head(n) if best_per_family else sorted_df.head(n)
+    sorted_df = sorted_df.reset_index(drop=True)
 
     for idx, row in sorted_df.iterrows():
         data = daily_forecasts if row["Frequency"] == FREQ_DAILY else monthly_forecasts
