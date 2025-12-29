@@ -24,6 +24,8 @@ def _run_normal_dlforecast(
     freq: int,
     horizon: int,
     input_size: int) -> Tuple[pd.DataFrame, pd.DataFrame]:
+
+    print(int(horizon // 2))
     dl_forecast = NeuralForecast(
         models=[
             NHITS(
@@ -34,8 +36,8 @@ def _run_normal_dlforecast(
                 max_steps=500,
                 inference_windows_batch_size=8,
                 learning_rate=1e-3,
+                early_stop_patience_steps=10
             ),
-            
             KAN(
                 h=horizon,
                 input_size=input_size,
@@ -43,6 +45,7 @@ def _run_normal_dlforecast(
                 scaler_type='robust',
                 learning_rate=1e-3,
                 max_steps=500,
+                early_stop_patience_steps=10
             ),
             RNN(
                 h=horizon,
@@ -55,26 +58,28 @@ def _run_normal_dlforecast(
                 decoder_hidden_size=64,
                 decoder_layers=1,
                 max_steps=500,
+                early_stop_patience_steps=10
             ),
             LSTM(
                 input_size=input_size,
                 h=horizon,
-                max_steps=500,
                 loss=MAE(),
                 scaler_type='robust',
                 encoder_n_layers=1,
                 encoder_hidden_size=64,
                 decoder_hidden_size=64,
                 decoder_layers=1,
+                max_steps=500,
+                early_stop_patience_steps=10
             ),
         ],
         freq=freq,
     )
 
-    dl_forecast.fit(df=train)
+    dl_forecast.fit(df=train, val_size=horizon)
     dl_val = dl_forecast.predict(h=horizon)
 
-    dl_forecast.fit(df=pd.concat([train, val]))
+    dl_forecast.fit(df=pd.concat([train, val]), val_size=horizon)
     dl_test = dl_forecast.predict(h=horizon)
     return dl_val, dl_test
 
@@ -99,6 +104,7 @@ def _run_lag_dlforecast(
                 max_steps=500,
                 inference_windows_batch_size=8,
                 learning_rate=1e-3,
+                early_stop_patience_steps=10,
                 hist_exog_list=lags_columns
             ),
             KAN(
@@ -108,6 +114,7 @@ def _run_lag_dlforecast(
                 scaler_type='robust',
                 learning_rate=1e-3,
                 max_steps=500,
+                early_stop_patience_steps=10,
                 hist_exog_list=lags_columns
             ),
             RNN(
@@ -121,6 +128,7 @@ def _run_lag_dlforecast(
                 decoder_hidden_size=64,
                 decoder_layers=1,
                 max_steps=500,
+                early_stop_patience_steps=10,        
                 hist_exog_list=lags_columns
             ),
             LSTM(
@@ -133,18 +141,19 @@ def _run_lag_dlforecast(
                 decoder_hidden_size=64,
                 decoder_layers=1,
                 max_steps=500,
+                early_stop_patience_steps=10,
                 hist_exog_list=lags_columns
             ),
         ],
         freq=freq,
     )
 
-    dl_forecast_lag.fit(df=train_lag)
+    dl_forecast_lag.fit(df=train_lag, val_size=horizon)
     dl_val_lag = dl_forecast_lag.predict(h=horizon)
     
-    dl_forecast_lag.fit(df=pd.concat([train_lag, val_lag]))
+    dl_forecast_lag.fit(df=pd.concat([train_lag, val_lag]), val_size=horizon)
     dl_test_lag = dl_forecast_lag.predict(h=horizon)
-    
+
     rename_dict = {col: f"{col}_Lag" for col in dl_val_lag.columns if col not in ['unique_id', 'ds']}
     dl_val_lag = dl_val_lag.rename(columns=rename_dict)
     dl_test_lag = dl_test_lag.rename(columns=rename_dict)

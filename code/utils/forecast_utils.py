@@ -69,8 +69,12 @@ def merge_holidays(df: pd.DataFrame, freq: str, date_range: tuple) -> pd.DataFra
 def _create_dl_lag_daily(df: pd.DataFrame, date_range: tuple) -> pd.DataFrame:
     df = merge_holidays(df, FREQ_DAILY, date_range)
 
-    # 6 useful lag features
     grouped = df.groupby('unique_id')['y']
+
+    for lag in [1, 2, 3, 7, 14, 28]:
+        df[f'lag_{lag}'] = grouped.transform(lambda x: x.shift(lag)).fillna(0)
+
+    df['day_of_week'] = df['ds'].dt.dayofweek
 
     df['rolling_mean_3_lag1'] = grouped.transform(
         lambda x: x.shift(1).rolling(window=3).mean()
@@ -89,8 +93,12 @@ def _create_dl_lag_daily(df: pd.DataFrame, date_range: tuple) -> pd.DataFrame:
 def _create_dl_lag_monthly(df: pd.DataFrame, date_range: tuple) -> pd.DataFrame:
     df = merge_holidays(df, FREQ_MONTHLY, date_range)
 
-    # 6 useful lag features
     grouped = df.groupby('unique_id')['y']
+
+    for lag in [1, 2, 3, 12]:
+        df[f'lag_{lag}'] = grouped.transform(lambda x: x.shift(lag)).fillna(0)
+
+    df['month'] = df['ds'].dt.month
 
     df['rolling_mean_3_lag6'] = grouped.transform(
         lambda x: x.shift(6).rolling(window=3).mean()
