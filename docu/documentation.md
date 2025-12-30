@@ -10,13 +10,13 @@
 #### Value of predicted variables
 > The model provides monthly wholesale electricity price forecasts based on historical price trends, additional features, like lag features (previous months) or a holiday feature, rolling averages seasonal patterns. These forecasts give stakeholders forward-looking price visibility.
 
-> While the forecast does not quantify uncertainty, it serves as a directional planning tool that helps organizations move from reactive decision-making to proactive cost management. The core value is to reduce electricity cost volatility and planning risk by turning uncertain wholesale prices into actionable procurement, hedging, and budgeting decisions.
+> While the forecast does not quantify uncertainty, it serves as a directional planning tool that helps organizations move from reactive decision-making to proactive cost management. The core value is to reduce electricity cost volatility and planning risk by turning uncertain wholesale prices into actionable procurement, hedging and budgeting decisions.
 
 #### Desicions/Actions based on the prediction
 - **Utilities**: Optimize electricity procurement and trading strategies to reduce costs.
 - **Industries**: Schedule energy-intensive operations during low-price periods.
 - **Policymakers**: Adjust subsidies or implement market interventions to stabilize costs.
-- **Quantified impact**: Even a 5–10% improvement in price prediction accuracy can reduce operational and procurement costs by millions of euros annually, while confidence intervals help assess financial risk under uncertainty.
+- **Quantified impact**: Even a 5–10% improvement in price prediction accuracy can reduce operational and procurement costs by millions of euros annually.
 
 ### Data engineering and preparation:
 > The raw dataset (`eu_electricity_daily.csv`) contains daily wholesale electricity prices for multiple European countries from 2015 onwards.
@@ -29,7 +29,7 @@
   - `Price (EUR/MWhe)` → `y` (target variable)
 - Date parsing with format `%Y-%m-%d` and sorting by date
 
-**Frequency Variants:**
+**Frequency Variants:**while
 Two separate datasets are prepared:
 1. **Daily data:** Original daily frequency preserved for capturing short-term patterns
 2. **Monthly data:** Daily prices aggregated to monthly frequency using mean values to reduce volatility and focus on longer-term trends
