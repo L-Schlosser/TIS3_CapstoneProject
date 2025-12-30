@@ -169,13 +169,24 @@ def plot_forecasts(
                     # Get z-score for the confidence level
                     z_score = stats.norm.ppf((1 + confidence) / 2)
                     
-                    # Calculate bounds (apply to all forecasts, including future)
-                    margin_of_error = z_score * std_error
-                    lower_bound = df[forecast_col] - margin_of_error
-                    upper_bound = df[forecast_col] + margin_of_error
+                    # Get the last date with historical data
+                    last_historical_date = merged['ds'].max()
+                    
+                    # Calculate time-dependent margin of error (grows with forecast horizon)
+                    # Formula: base_margin * sqrt(1 + (days_ahead / scaling_factor))
+                    base_margin = z_score * std_error
+                    df_copy = df.copy()
+                    df_copy['days_ahead'] = (df_copy['ds'] - last_historical_date).dt.days
+                    df_copy['days_ahead'] = df_copy['days_ahead'].clip(lower=0)  # Only count future days
+                    
+                    scaling_factor = max(1, len(residuals) / 4)  # Scale by historical period length
+                    df_copy['margin'] = base_margin * (1 + df_copy['days_ahead'] / scaling_factor).apply(lambda x: (x)**0.25) # Scale margin by 4th root of relative forecast
+                    
+                    lower_bound = df_copy[forecast_col] - df_copy['margin']
+                    upper_bound = df_copy[forecast_col] + df_copy['margin']
                     
                     plt.fill_between(
-                        df["ds"],
+                        df_copy["ds"],
                         lower_bound,
                         upper_bound,
                         color=palette[i],
