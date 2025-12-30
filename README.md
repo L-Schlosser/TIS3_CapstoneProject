@@ -51,34 +51,6 @@ TIS3_CapstoneProject/
 └── README.md                       # This file
 ```
 
-## Use Cases:
-
-### Energy Utilities & Traders
-- Optimize electricity procurement strategies and hedging decisions
-- Plan procurement timing to minimize costs during predicted price peaks
-- Reduce exposure to volatile wholesale prices through forward-looking visibility
-
-### Energy-Intensive Industries
-- Schedule energy-intensive operations (manufacturing, mining, data centers) during predicted low-price periods
-- Improve budget forecasting and reduce operational cost uncertainty
-- Optimize production planning around electricity cost cycles
-
-### Policy Makers & Regulators
-- Assess market stability and inform subsidy policies
-- Design market interventions based on predicted price trends
-- Monitor energy market dynamics and plan capacity investments
-
-### Financial Institutions
-- Price electricity derivatives and futures contracts
-- Manage energy portfolio risk and hedging strategies
-- Develop investment strategies around renewable vs. conventional energy
-
-### Energy Planners & Consultants
-- Provide clients with forward-looking price intelligence
-- Support business case analysis for energy projects
-- Benchmark forecasting accuracy across different approaches
-
-
 ## Documentation
 
 For technical details and the hole documentation about this Project -> see [`documentation.md`](docu/documentation.md).
