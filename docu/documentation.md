@@ -5,12 +5,12 @@
 
 ### Business Problem:
 #### Problem:
-> Wholesale electricity prices in Austria fluctuate significantly due to seasonal demand, renewable generation variability, and market dynamics. Uncertainty in future prices makes procurement, trading, and operational planning difficult for utilities, industries, and policymakers.
+> Wholesale electricity prices in Austria are highly volatile due to seasonal demand patterns, renewable generation variability, and changing market conditions. This volatility makes it difficult for utilities, energy-intensive companies, and planners to anticipate future costs, leading to suboptimal procurement timing, budgeting inaccuracies, and increased exposure to price spikes.
 
 #### Value of predicted variables
-> The model predicts monthly electricity prices using historical prices, additional features, like lag features (previous months) or a holiday feature, rolling averages, seasonal indicators, and potentially correlated variables like demand or neighboring countries’ prices.
+> The model provides monthly wholesale electricity price forecasts based on historical price trends, additional features, like lag features (previous months) or a holiday feature, rolling averages seasonal patterns. These forecasts give stakeholders forward-looking price visibility.
 
-> Predicted prices with confidence intervals allow stakeholders to anticipate cost fluctuations and plan ahead.
+> While the forecast does not quantify uncertainty, it serves as a directional planning tool that helps organizations move from reactive decision-making to proactive cost management. The core value is to reduce electricity cost volatility and planning risk by turning uncertain wholesale prices into actionable procurement, hedging, and budgeting decisions.
 
 #### Desicions/Actions based on the prediction
 - **Utilities**: Optimize electricity procurement and trading strategies to reduce costs.
@@ -159,9 +159,82 @@ Why these metrics:
 - RMSE: Penalizes large errors more strongly, highlighting models that avoid big misses. Useful when risk of large deviations carries higher operational costs.
 - MAPE: Scale-free percentage error, enabling comparison across periods and facilitating stakeholder communication. Note: care is taken with low `y` values as MAPE can inflate when actuals are near zero.
 
-Visual diagnostics such as predicted vs. actual plots, residual analysis, and prediction intervals are used to assess performance.
+Visual diagnostics such as predicted vs. actual plots and residual analysis are used to assess performance.
 
-The final model is selected based on forecast accuracy, stability, and the quality of uncertainty estimates.
+The final model is selected based on WAPE (Weighted Absolute Percentage Error), which provides a robust evaluation metric for comparing models across different frequencies and families.
 
 ### Final prediction
-> The selected model generates a **monthly electricity price forecast for Austria**, with a focus on **January 2026**.
+> After comprehensive evaluation across all model families (baseline, statistical, machine learning, and deep learning) and both frequencies (daily and monthly), the **best overall model** is selected based on WAPE performance on the validation set.
+
+**Best Model Selection:**
+The model selection process identifies:
+- **Best overall model:** Single best-performing model across all families and frequencies
+- **Best model per frequency:** Top-performing models for daily and monthly forecasts separately
+- **Best model per family:** Top performer from each of the four model families (baseline, statistical, ML, deep learning)
+- **Top 3 models:** Three best models for comparative analysis
+
+**Final Model Performance:**
+The selected best model demonstrates superior forecasting accuracy with the following characteristics:
+- Trained on historical data from 2015 to end of 2024 (approximately 10 years)
+- Validated on 2025 data (12 months for monthly frequency, 365 days for daily frequency)
+- Evaluated using MAE, RMSE, MAPE, and WAPE metrics
+- All metrics stored in `results/metrics/` for reproducibility and comparison
+
+**Forecast for January 2026:**
+The best model generates daily price predictions for January 2026, which are:
+- Aggregated to provide monthly insights for strategic planning
+- Visualized as time-series plots showing predicted values
+- Stored in `results/visualizations/forecasts/best_model_jan2026.png`
+
+**Extended Forecast for 2026:**
+Beyond January, the model provides forecasts for the entire year 2026:
+- Monthly predictions from January through December 2026
+- Enables year-ahead planning for procurement and budgeting decisions
+- Visualization saved as `results/visualizations/forecasts/best_model_2026.png`
+- Predictions consider seasonal patterns and historical trends learned during training
+
+**Visualization Suite:**
+Multiple visualizations are generated to support model interpretation and stakeholder communication:
+
+1. **Best Model Forecasts:**
+   - `forecast_best_model_monthly.png`: Best overall model's monthly predictions vs. ground truth
+   - `forecast_best_model_daily.png`: Best daily frequency model's predictions
+   - Shows historical data, validation period performance, and future forecasts
+
+2. **Top 3 Models Comparison:**
+   - `forecast_best_3_models_both.png`: Three best models across all frequencies on monthly scale
+   - `forecast_best_3_models_monthly.png`: Top 3 monthly-frequency models
+   - `forecast_best_3_models_daily.png`: Top 3 daily-frequency models
+   - Enables comparison of different modeling approaches and their forecast agreement
+
+3. **Best Per Family Analysis:**
+   - `forecast_best_per_family.png`: Shows top performer from each model family
+   - Demonstrates relative strengths of baseline, statistical, ML, and deep learning approaches
+   - Helps understand which modeling paradigm works best for this problem
+
+4. **Residual Analysis:**
+   - `residuals_{model_name}_{frequency}.png`: Scatter plots of predicted vs. actual values
+   - Perfect predictions would fall on the diagonal red line
+   - Reveals systematic biases or heteroscedasticity in model errors
+   - Generated for both best monthly and best daily models
+
+**Key Insights:**
+- The final model successfully captures seasonal patterns, with higher predictions during winter months
+- Trend components account for the long-term upward trajectory in electricity prices
+- Lag features and rolling statistics enable the model to respond to recent price movements
+- Holiday features help adjust predictions for periods of reduced demand
+- The model provides actionable forecasts that stakeholders can use for:
+  - Procurement timing optimization
+  - Budget planning with reduced uncertainty
+  - Risk assessment for energy-intensive operations
+  - Policy intervention timing
+
+**Reproducibility:**
+All forecasts, metrics, and visualizations are stored in the `results/` directory structure:
+- `results/forecast_data/`: Raw forecast outputs for all models
+- `results/metrics/`: Performance metrics for all model-frequency-family combinations
+- `results/visualizations/forecasts/`: All forecast plots and residual analyses
+- The `use_existing=True` parameter enables loading cached results for consistent reporting
+
+
+
