@@ -5,12 +5,12 @@
 
 ### Business Problem:
 #### Problem:
-> Wholesale electricity prices in Austria fluctuate significantly due to seasonal demand, renewable generation variability, and market dynamics. Uncertainty in future prices makes procurement, trading, and operational planning difficult for utilities, industries, and policymakers.
+> Wholesale electricity prices in Austria are highly volatile due to seasonal demand patterns, renewable generation variability, and changing market conditions. This volatility makes it difficult for utilities, energy-intensive companies, and planners to anticipate future costs, leading to suboptimal procurement timing, budgeting inaccuracies, and increased exposure to price spikes.
 
 #### Value of predicted variables
-> The model predicts monthly electricity prices using historical prices, additional features, like lag features (previous months) or a holiday feature, rolling averages, seasonal indicators, and potentially correlated variables like demand or neighboring countries’ prices.
+> The model provides monthly wholesale electricity price forecasts based on historical price trends, additional features, like lag features (previous months) or a holiday feature, rolling averages seasonal patterns. These forecasts give stakeholders forward-looking price visibility.
 
-> Predicted prices with confidence intervals allow stakeholders to anticipate cost fluctuations and plan ahead.
+> While the forecast does not quantify uncertainty, it serves as a directional planning tool that helps organizations move from reactive decision-making to proactive cost management. The core value is to reduce electricity cost volatility and planning risk by turning uncertain wholesale prices into actionable procurement, hedging, and budgeting decisions.
 
 #### Desicions/Actions based on the prediction
 - **Utilities**: Optimize electricity procurement and trading strategies to reduce costs.
@@ -159,9 +159,65 @@ Why these metrics:
 - RMSE: Penalizes large errors more strongly, highlighting models that avoid big misses. Useful when risk of large deviations carries higher operational costs.
 - MAPE: Scale-free percentage error, enabling comparison across periods and facilitating stakeholder communication. Note: care is taken with low `y` values as MAPE can inflate when actuals are near zero.
 
-Visual diagnostics such as predicted vs. actual plots, residual analysis, and prediction intervals are used to assess performance.
+Visual diagnostics such as predicted vs. actual plots and residual analysis are used to assess performance.
 
-The final model is selected based on forecast accuracy, stability, and the quality of uncertainty estimates.
+The final model is selected based on WAPE (Weighted Absolute Percentage Error), which accounts for the magnitude of actual values and provides a robust measure of forecast accuracy across different price levels.
 
-### Final prediction
-> The selected model generates a **monthly electricity price forecast for Austria**, with a focus on **January 2026**.
+### Model Selection and Performance Analysis
+> After comprehensive evaluation across all model families, the **best-performing models** are identified based on WAPE scores on the validation set (January–December 2025).
+
+**Selection Process:**
+- **Overall ranking:** Models are sorted by WAPE across both daily and monthly frequencies to identify the top performers regardless of frequency or family.
+- **Best per frequency:** Separate rankings for daily and monthly models allow frequency-specific model selection.
+- **Best per family:** The top model from each family (baseline, statistical, machine learning, deep learning) is identified to compare approaches.
+
+**Visualization of Model Performance:**
+
+1. **Best 3 Models Overall:** A time-series plot comparing the three best-performing models against actual prices from 2023 onwards. This visualization uses monthly frequency to show clean trend comparisons and extends into the forecast horizon (2026). The plot demonstrates how the top models track actual price movements, handle volatility periods, and project future trends.
+
+2. **Best Model by Frequency:** Separate plots for the best daily and monthly models show forecast performance at different granularities:
+   - **Daily forecasts:** Capture short-term fluctuations and weekly patterns, useful for operational scheduling.
+   - **Monthly forecasts:** Focus on longer-term trends and seasonal patterns, ideal for strategic planning and budgeting.
+
+3. **Best Model per Family:** A comparative visualization showing the top performer from each modeling approach (baseline, statistical, ML, DL). This helps understand the relative strengths of different methodologies and validates whether sophisticated approaches outperform simpler baselines.
+
+4. **Residual Analysis:** An actual vs. predicted scatter plot for the best model, showing:
+   - How closely predictions align with actual values (points near the diagonal line indicate accurate forecasts)
+   - Systematic biases (points consistently above or below the diagonal)
+   - Variance patterns (spread of points indicates prediction uncertainty)
+   - Performance across different price ranges
+
+**Why the Best Model Was Selected:**
+
+The chosen model, "LGBMRegressor_Lag", achieves the lowest WAPE score, indicating superior accuracy in predicting electricity prices while accounting for the magnitude of actual values. WAPE is preferred over MAPE because:
+- It weights errors by actual values, preventing disproportionate impact from low-price periods
+- It provides more stable performance assessment across different market conditions
+- It aligns better with business objectives where absolute forecast error matters more at higher price levels
+
+The selected model demonstrates:
+- **Consistent accuracy:** Low error metrics (MAE, RMSE, MAPE, WAPE) across the validation period
+- **Trend capture:** Successfully tracks the upward price trend observed since 2021
+- **Seasonality handling:** Captures monthly and yearly seasonal patterns effectively
+- **Volatility management:** Reasonable predictions even during high-volatility periods
+
+### Final Prediction
+> The selected model, "LGBMRegressor_Lag" generates a **monthly electricity price forecast for Austria** for the entire year 2026.
+
+**January 2026 Forecast:**
+The model provides daily price predictions throughout January 2026, which are visualized and aggregated to show expected price levels during the first month of the forecast horizon. This near-term forecast has higher confidence as it relies on recent historical patterns and shorter-term dependencies.
+
+**Full Year 2026 Forecast:**
+Monthly aggregated forecasts for the entire year 2026 reveal expected seasonal patterns and long-term trends. The forecast helps stakeholders anticipate:
+- **Seasonal price variations:** Higher prices expected during winter months (January, February, December) due to increased heating demand
+- **Summer trends:** Relatively lower prices during spring and summer months when demand moderates
+
+**Practical Applications:**
+- **Procurement planning:** Utilities can schedule bulk electricity purchases during forecasted low-price periods
+- **Hedging strategies:** Energy traders can use forecasts to inform futures contracts and risk management
+- **Operational scheduling:** Industrial consumers can plan energy-intensive operations during anticipated low-price windows
+- **Budget planning:** Organizations can develop more accurate electricity cost budgets for 2026 based on monthly forecasts
+
+The forecasts represent point estimates based on historical patterns and current trends. While uncertainty naturally increases for longer horizons, the model provides actionable insights for proactive energy management throughout 2026.
+
+
+
