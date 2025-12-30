@@ -161,80 +161,63 @@ Why these metrics:
 
 Visual diagnostics such as predicted vs. actual plots and residual analysis are used to assess performance.
 
-The final model is selected based on WAPE (Weighted Absolute Percentage Error), which provides a robust evaluation metric for comparing models across different frequencies and families.
+The final model is selected based on WAPE (Weighted Absolute Percentage Error), which accounts for the magnitude of actual values and provides a robust measure of forecast accuracy across different price levels.
 
-### Final prediction
-> After comprehensive evaluation across all model families (baseline, statistical, machine learning, and deep learning) and both frequencies (daily and monthly), the **best overall model** is selected based on WAPE performance on the validation set.
+### Model Selection and Performance Analysis
+> After comprehensive evaluation across all model families, the **best-performing models** are identified based on WAPE scores on the validation set (January–December 2025).
 
-**Best Model Selection:**
-The model selection process identifies:
-- **Best overall model:** Single best-performing model across all families and frequencies
-- **Best model per frequency:** Top-performing models for daily and monthly forecasts separately
-- **Best model per family:** Top performer from each of the four model families (baseline, statistical, ML, deep learning)
-- **Top 3 models:** Three best models for comparative analysis
+**Selection Process:**
+- **Overall ranking:** Models are sorted by WAPE across both daily and monthly frequencies to identify the top performers regardless of frequency or family.
+- **Best per frequency:** Separate rankings for daily and monthly models allow frequency-specific model selection.
+- **Best per family:** The top model from each family (baseline, statistical, machine learning, deep learning) is identified to compare approaches.
 
-**Final Model Performance:**
-The selected best model demonstrates superior forecasting accuracy with the following characteristics:
-- Trained on historical data from 2015 to end of 2024 (approximately 10 years)
-- Validated on 2025 data (12 months for monthly frequency, 365 days for daily frequency)
-- Evaluated using MAE, RMSE, MAPE, and WAPE metrics
-- All metrics stored in `results/metrics/` for reproducibility and comparison
+**Visualization of Model Performance:**
 
-**Forecast for January 2026:**
-The best model generates daily price predictions for January 2026, which are:
-- Aggregated to provide monthly insights for strategic planning
-- Visualized as time-series plots showing predicted values
-- Stored in `results/visualizations/forecasts/best_model_jan2026.png`
+1. **Best 3 Models Overall:** A time-series plot comparing the three best-performing models against actual prices from 2023 onwards. This visualization uses monthly frequency to show clean trend comparisons and extends into the forecast horizon (2026). The plot demonstrates how the top models track actual price movements, handle volatility periods, and project future trends.
 
-**Extended Forecast for 2026:**
-Beyond January, the model provides forecasts for the entire year 2026:
-- Monthly predictions from January through December 2026
-- Enables year-ahead planning for procurement and budgeting decisions
-- Visualization saved as `results/visualizations/forecasts/best_model_2026.png`
-- Predictions consider seasonal patterns and historical trends learned during training
+2. **Best Model by Frequency:** Separate plots for the best daily and monthly models show forecast performance at different granularities:
+   - **Daily forecasts:** Capture short-term fluctuations and weekly patterns, useful for operational scheduling.
+   - **Monthly forecasts:** Focus on longer-term trends and seasonal patterns, ideal for strategic planning and budgeting.
 
-**Visualization Suite:**
-Multiple visualizations are generated to support model interpretation and stakeholder communication:
+3. **Best Model per Family:** A comparative visualization showing the top performer from each modeling approach (baseline, statistical, ML, DL). This helps understand the relative strengths of different methodologies and validates whether sophisticated approaches outperform simpler baselines.
 
-1. **Best Model Forecasts:**
-   - `forecast_best_model_monthly.png`: Best overall model's monthly predictions vs. ground truth
-   - `forecast_best_model_daily.png`: Best daily frequency model's predictions
-   - Shows historical data, validation period performance, and future forecasts
+4. **Residual Analysis:** An actual vs. predicted scatter plot for the best model, showing:
+   - How closely predictions align with actual values (points near the diagonal line indicate accurate forecasts)
+   - Systematic biases (points consistently above or below the diagonal)
+   - Variance patterns (spread of points indicates prediction uncertainty)
+   - Performance across different price ranges
 
-2. **Top 3 Models Comparison:**
-   - `forecast_best_3_models_both.png`: Three best models across all frequencies on monthly scale
-   - `forecast_best_3_models_monthly.png`: Top 3 monthly-frequency models
-   - `forecast_best_3_models_daily.png`: Top 3 daily-frequency models
-   - Enables comparison of different modeling approaches and their forecast agreement
+**Why the Best Model Was Selected:**
 
-3. **Best Per Family Analysis:**
-   - `forecast_best_per_family.png`: Shows top performer from each model family
-   - Demonstrates relative strengths of baseline, statistical, ML, and deep learning approaches
-   - Helps understand which modeling paradigm works best for this problem
+The chosen model, "LGBMRegressor_Lag", achieves the lowest WAPE score, indicating superior accuracy in predicting electricity prices while accounting for the magnitude of actual values. WAPE is preferred over MAPE because:
+- It weights errors by actual values, preventing disproportionate impact from low-price periods
+- It provides more stable performance assessment across different market conditions
+- It aligns better with business objectives where absolute forecast error matters more at higher price levels
 
-4. **Residual Analysis:**
-   - `residuals_{model_name}_{frequency}.png`: Scatter plots of predicted vs. actual values
-   - Perfect predictions would fall on the diagonal red line
-   - Reveals systematic biases or heteroscedasticity in model errors
-   - Generated for both best monthly and best daily models
+The selected model demonstrates:
+- **Consistent accuracy:** Low error metrics (MAE, RMSE, MAPE, WAPE) across the validation period
+- **Trend capture:** Successfully tracks the upward price trend observed since 2021
+- **Seasonality handling:** Captures monthly and yearly seasonal patterns effectively
+- **Volatility management:** Reasonable predictions even during high-volatility periods
 
-**Key Insights:**
-- The final model successfully captures seasonal patterns, with higher predictions during winter months
-- Trend components account for the long-term upward trajectory in electricity prices
-- Lag features and rolling statistics enable the model to respond to recent price movements
-- Holiday features help adjust predictions for periods of reduced demand
-- The model provides actionable forecasts that stakeholders can use for:
-  - Procurement timing optimization
-  - Budget planning with reduced uncertainty
-  - Risk assessment for energy-intensive operations
-  - Policy intervention timing
+### Final Prediction
+> The selected model, "LGBMRegressor_Lag" generates a **monthly electricity price forecast for Austria** for the entire year 2026.
 
-**Reproducibility:**
-All forecasts, metrics, and visualizations are stored in the `results/` directory structure:
-- `results/forecast_data/`: Raw forecast outputs for all models
-- `results/metrics/`: Performance metrics for all model-frequency-family combinations
-- `results/visualizations/forecasts/`: All forecast plots and residual analyses
-- The `use_existing=True` parameter enables loading cached results for consistent reporting
+**January 2026 Forecast:**
+The model provides daily price predictions throughout January 2026, which are visualized and aggregated to show expected price levels during the first month of the forecast horizon. This near-term forecast has higher confidence as it relies on recent historical patterns and shorter-term dependencies.
+
+**Full Year 2026 Forecast:**
+Monthly aggregated forecasts for the entire year 2026 reveal expected seasonal patterns and long-term trends. The forecast helps stakeholders anticipate:
+- **Seasonal price variations:** Higher prices expected during winter months (January, February, December) due to increased heating demand
+- **Summer trends:** Relatively lower prices during spring and summer months when demand moderates
+
+**Practical Applications:**
+- **Procurement planning:** Utilities can schedule bulk electricity purchases during forecasted low-price periods
+- **Hedging strategies:** Energy traders can use forecasts to inform futures contracts and risk management
+- **Operational scheduling:** Industrial consumers can plan energy-intensive operations during anticipated low-price windows
+- **Budget planning:** Organizations can develop more accurate electricity cost budgets for 2026 based on monthly forecasts
+
+The forecasts represent point estimates based on historical patterns and current trends. While uncertainty naturally increases for longer horizons, the model provides actionable insights for proactive energy management throughout 2026.
 
 
 
