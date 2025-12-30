@@ -155,7 +155,7 @@ def plot_forecasts(
         plt.plot(
             df["ds"],
             df[forecast_col],
-            label=f"{i+1}: {model_name} (freq: {model["frequency"]}, family: {model["family"]})",
+            label=f"{i+1}: {model_name} (freq: {model['frequency']}, family: {model['family']})",
             color=palette[i],
             linewidth=2
         )
@@ -204,5 +204,5 @@ def plot_residuals(model):
     plt.ylim([min_val, max_val])
     plt.plot([min_val, max_val], [min_val, max_val], color='red', linestyle='--')
     plt.title("Predicted vs Actual Values")
-    plt.legend([f"{model_name} (freq: {model[0]["frequency"]}, family: {model[0]["family"]})"])
+    plt.legend([f"{model_name} (freq: {model[0]['frequency']}, family: {model[0]['family']})"])
     plt.savefig(os.path.join(VISUALIZATION_DIR, f'forecasts/residuals_{model_name}_{frequency}.png'), dpi=300, bbox_inches='tight')
