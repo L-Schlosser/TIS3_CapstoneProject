@@ -87,7 +87,7 @@ def plot_ground_truth_distribution(
 def plot_ground_truth_heatmap(
     start_val: str = DEFAULT_START_VAL_DATASET,
     end_val: str = FUTURE_END_VAL_VIS,
-    figsize=(10, 10)
+    figsize=(10, 8)
 ):
     plt.figure(figsize=figsize)
     gt = get_ground_truth(FREQ_MONTHLY, start_val, end_val)
