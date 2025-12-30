@@ -6,16 +6,16 @@
 - Welt Jonas 
 
 ## Overview
-This repository contains the capstone project for the Time Series Forecasting (TIS3) course at Hagenberg University of Applied Sciences. The project, developed by **VoltVision** (Lorenz, Karim, and Jonas), focuses on Austrian wholesale electricity price forecasting for 2026 (in specific January).
+This repository contains the capstone project for the Time Series Forecasting (TIS3) course at Hagenberg University of Applied Sciences. The project, developed by **VoltVision** (Lorenz, Karim, and Jonas), focuses on Austrian wholesale electricity price forecasting for 2026 (in specific January).  
 
 ## Project Goal
-Predict monthly wholesale electricity prices for Austria throughout 2026 to help utilities, energy companies, and policymakers make informed procurement, hedging, and budgeting decisions in the face of volatile energy markets.
+Predict monthly wholesale electricity prices for Austria throughout 2026 to help utilities, energy companies, and policymakers make informed procurement, hedging, and budgeting decisions in the face of volatile energy markets.  
 
 ## Key Results
-Best Model: LGBMRegressor with lag features
-Performance Metric: WAPE (Weighted Absolute Percentage Error) = 0.1348
-MAE: 13.47 EUR/MWh | RMSE: 18.48 EUR/MWh
-Forecast Period: Full year 2026 with daily granularity
+Best Model: LGBMRegressor with lag features  
+Performance Metric: WAPE (Weighted Absolute Percentage Error) = 0.1348  
+MAE: 13.47 EUR/MWh | RMSE: 18.48 EUR/MWh  
+Forecast Period: Full year 2026 with daily granularity  
 
 ## Repo Structure:
 ```
@@ -44,6 +44,7 @@ TIS3_CapstoneProject/
 │   ├── metrics/                    # Performance metrics by model family
 │   └── visualizations/
 │       └── forecasts/              # Forecast plots and residual analysis
+│       └── ground_truth/           # Ground Truth Plots
 ├── docu/
 │   └── documentation.md            # Comprehensive project documentation
 ├── handin/
