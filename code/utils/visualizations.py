@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import seaborn as sns
 import pandas as pd
+from scipy import stats
 
 if __package__:
     from .constants import FREQ_DAILY, FREQ_MONTHLY, DEFAULT_START_VAL_DATASET, DEFAULT_START_VAL_VIS, FUTURE_END_VAL_VIS, VISUALIZATION_DIR
@@ -114,6 +115,7 @@ def plot_forecasts(
     start_val: str = DEFAULT_START_VAL_VIS,
     end_val: str = FUTURE_END_VAL_VIS,
     gt_label: str = "Ground Truth",
+    confidence: float = None,
     figsize=(14, 5)
 ):
     plt.figure(figsize=figsize)
@@ -151,6 +153,35 @@ def plot_forecasts(
             )
 
         forecast_col = forecast_col[0]
+
+        # Calculate confidence interval if available
+        if confidence is not None:
+            # Merge forecast with ground truth to calculate residuals
+            merged = df[["ds", forecast_col]].merge(gt[["ds", "y"]], on="ds", how="inner")
+            
+            if len(merged) > 0:
+                residuals = (merged[forecast_col] - merged['y']).dropna()
+                
+                if len(residuals) > 0 and residuals.std() > 0:
+                    # Calculate standard error from historical residuals
+                    std_error = residuals.std()
+                    
+                    # Get z-score for the confidence level
+                    z_score = stats.norm.ppf((1 + confidence) / 2)
+                    
+                    # Calculate bounds (apply to all forecasts, including future)
+                    margin_of_error = z_score * std_error
+                    lower_bound = df[forecast_col] - margin_of_error
+                    upper_bound = df[forecast_col] + margin_of_error
+                    
+                    plt.fill_between(
+                        df["ds"],
+                        lower_bound,
+                        upper_bound,
+                        color=palette[i],
+                        alpha=0.2,
+                        label=f"{i+1}: {model_name} ({int(confidence * 100)}% CI)"
+                    )
 
         plt.plot(
             df["ds"],
